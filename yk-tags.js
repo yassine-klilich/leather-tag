@@ -1,13 +1,5 @@
 "use strict";
 
-
-/**
- * start with the very basic feature
- * - add tags when pressing enter
- * - remove tag
- * 
- */
-
 if(window.Tags == undefined) {
   window.Tags = (function() {
     
@@ -34,6 +26,7 @@ if(window.Tags == undefined) {
 				inputTags: null,
 			}
 			let _values = []
+			let _tagItems = []
 
 			Object.defineProperty(this, "config", {
 				get: () => _config
@@ -42,7 +35,16 @@ if(window.Tags == undefined) {
 				get: () => _dom
 			})
 			Object.defineProperty(this, "values", {
-				get: () => _values
+				get: () => _values,
+				set: (value) => _values = value,
+			})
+			Object.defineProperty(this, "tagItems", {
+				get: () => _tagItems,
+				set: (value) => _tagItems = value,
+			})
+			Object.defineProperty(this, "inputValue", {
+				get: () => this.dom.inputTags.value,
+				set: (value) => this.dom.inputTags.value = value,
 			})
 			
 			_initGUI.call(this)
@@ -52,14 +54,29 @@ if(window.Tags == undefined) {
 			const tagItem = _createTagItem.call(this, value)
 			this.dom.tagsWrapper.insertBefore(tagItem, this.dom.inputTags)
 			this.values.push(value)
+			this.tagItems.push(tagItem)
 		}
 
-		Tags.prototype.remove = function() {
-			
+		/**
+		 * Remove tag item
+		 * @param {number | HTMLElement} tagItem Even tag index or tag element
+		 */
+		Tags.prototype.removeTag = function(tagItem) {
+			for (let i = 0; i < this.tagItems.length; i++) {
+				if(i == tagItem || this.tagItems[i] == tagItem) {
+					this.dom.tagsWrapper.removeChild(this.tagItems[i])
+					this.values.splice(i, 1)
+					this.tagItems.splice(i, 1)
+					break
+				}
+			}
 		}
 
 		Tags.prototype.removeAll = function() {
-			
+			this.values = []
+			this.tagItems = []
+			this.dom.tagsWrapper.innerHTML = ""
+			this.dom.tagsWrapper.appendChild(this.dom.inputTags)
 		}
 
 		function _initGUI() {
@@ -75,20 +92,31 @@ if(window.Tags == undefined) {
 
 				this.dom.inputTags.setAttribute("placeholder", "Type and press Enter")
 				this.dom.inputTags.addEventListener("keyup", _onKeyUpInputTags.bind(this))
+				this.dom.inputTags.addEventListener("keydown", _onKeyDownInputTags.bind(this))
 			}
 		}
 
 		/**
-		 * On keyup from the input element
+		 * Event handler for input element
 		 * @param {KeyboardEvent} event 
 		 */
 		function _onKeyUpInputTags(event) {
 			if(event.key == "Enter") {
-				const value = this.dom.inputTags.value
+				const value = this.inputValue
 				if(value.trim().length > 0) {
 					this.addTag(value)
-					this.dom.inputTags.value = ""
+					this.inputValue = ""
 				}
+			}
+		}
+
+		/**
+		 * Event handler for input element
+		 * @param {KeyboardEvent} event 
+		 */
+		function _onKeyDownInputTags(event) {
+			if(event.key == "Backspace" && this.inputValue.length == 0) {
+				this.removeTag(this.tagItems.length - 1)
 			}
 		}
 
@@ -101,7 +129,7 @@ if(window.Tags == undefined) {
 			tagValue.classList.add("yk-tags__value")
 			btnRemoveTag.classList.add("yk-tags__btn-remove")
 			btnRemoveTag.innerHTML = `<svg width="14" height="14" viewBox="0 0 48 48"><path fill="#767676" d="M38 12.83l-2.83-2.83-11.17 11.17-11.17-11.17-2.83 2.83 11.17 11.17-11.17 11.17 2.83 2.83 11.17-11.17 11.17 11.17 2.83-2.83-11.17-11.17z"/></svg>`
-			btnRemoveTag.addEventListener("click", _onClickRemoveTag.bind(this, tagItem))
+			btnRemoveTag.addEventListener("click", _onClickBtnRemoveTag.bind(this, tagItem))
 
 			tagValue.textContent = value
 			tagItem.appendChild(tagValue)
@@ -111,17 +139,11 @@ if(window.Tags == undefined) {
 		}
 
 		/**
-		 * 
+		 * On click button remove tag
 		 * @param {HTMLElement} tagItem 
 		 */
-		function _onClickRemoveTag(tagItem) {
-			const tagItems = this.dom.tagsWrapper.children
-			for (let i = 0; i < tagItems.length; i++) {
-				if(tagItems[i] == tagItem) {
-					this.dom.tagsWrapper.removeChild(tagItem)
-					break
-				}
-			}
+		function _onClickBtnRemoveTag(tagItem) {
+			this.removeTag(tagItem)
 		}
 
     function _buildConfigObject(config) {
