@@ -15,7 +15,15 @@
   <script src="yk-tags.js"></script>
 	<script>
 		const tags = new Tags({
-			el: "tags"
+			el: "tags",
+			tags: ["Couscous", "Tajine"],
+			classList: ["custom-tag"],
+			placeholder: "Add some food you like...",
+			clearOnBlur: true,
+			allowDuplicates: false,
+			allowedTags: ["Couscous", "Tajine", "Bastilla", "Rfisa", "Hrira", "Ma9loba"],
+			disallowedTags: ["Batata", "Maticha", "lkhyar"],
+			disabled: false,
 		})
 	</script>
 

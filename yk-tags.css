@@ -15,6 +15,7 @@
 	padding-left: 6px;
 	background-color: #f3f3f3;
 	border-radius: 4px;
+	line-height: 20px;
 }
 
 .yk-tags__value {
@@ -44,4 +45,12 @@
 	flex-grow: 1;
 	height: 24px;
 	font-size: 14px;
+}
+
+.yk-tags.yk-tags--disabled .yk-tags__item {
+	padding-right: 6px;
+}
+.yk-tags.yk-tags--disabled .yk-tags__btn-remove,
+.yk-tags.yk-tags--disabled .yk-tags__input {
+	display: none;
 }
