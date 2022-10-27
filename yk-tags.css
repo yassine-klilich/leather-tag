@@ -1,56 +1,56 @@
 .yk-tags {
-	padding: 6px;
-	border: 1px solid #acacac;
-	border-radius: 4px;
-	display: flex;
-	gap: 4px;
-	flex-wrap: wrap;
+  padding: 6px;
+  border: 1px solid #acacac;
+  border-radius: 4px;
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
 }
 
 .yk-tags__item {
-	display: flex;
-	align-items: center;
-	column-gap: 4px;
-	padding: 2px;
-	padding-left: 6px;
-	background-color: #f3f3f3;
-	border-radius: 4px;
-	line-height: 20px;
+  display: flex;
+  align-items: center;
+  column-gap: 4px;
+  padding: 2px;
+  padding-left: 6px;
+  background-color: #f3f3f3;
+  border-radius: 4px;
+  line-height: 20px;
 }
 
 .yk-tags__value {
-	font-size: 14px;
+  font-size: 14px;
 }
 
 .yk-tags__btn-remove {
-	padding: 2px;
-	margin: 0;
-	line-height: 0;
-	background: none;
-	border: none;
-	outline: none;
-	cursor: pointer;
-	border-radius: 50%;
+  padding: 2px;
+  margin: 0;
+  line-height: 0;
+  background: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  border-radius: 50%;
 }
 .yk-tags__btn-remove:hover {
-	background-color: #ddd;
+  background-color: #ddd;
 }
 
 .yk-tags__input {
-	margin: 0;
-	padding: 0;
-	border: none;
-	outline: none;
-	margin-left: 6px;
-	flex-grow: 1;
-	height: 24px;
-	font-size: 14px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  margin-left: 6px;
+  flex-grow: 1;
+  height: 24px;
+  font-size: 14px;
 }
 
 .yk-tags.yk-tags--disabled .yk-tags__item {
-	padding-right: 6px;
+  padding-right: 6px;
 }
 .yk-tags.yk-tags--disabled .yk-tags__btn-remove,
 .yk-tags.yk-tags--disabled .yk-tags__input {
-	display: none;
+  display: none;
 }
