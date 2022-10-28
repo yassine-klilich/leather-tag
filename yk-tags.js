@@ -38,7 +38,21 @@ if(window.Tags == undefined) {
       })
       Object.defineProperty(this, "values", {
         get: () => _values,
-        set: (value) => _values = value,
+        set: (value) => {
+          if((value instanceof Array) == false) {
+            throw new Error("ERROR[Tags.addAll] :: parameter is not instance of Array")
+          }
+          if(value.length == 0) {
+            _values = value
+            this.tagItems = []
+            this.dom.tagsWrapper.innerHTML = ""
+            this.dom.tagsWrapper.appendChild(this.dom.inputTags)
+          }
+          else {
+            this.removeAll()
+            this.addAll(value)
+          }
+        },
       })
       Object.defineProperty(this, "tagItems", {
         get: () => _tagItems,
@@ -65,7 +79,7 @@ if(window.Tags == undefined) {
       
       _checkConfigValues.call(this)
       _initGUI.call(this)
-      _initTagValues.call(this)
+      this.values = this.config.tags
       this.disabled = this.config.disabled
     }
 
@@ -95,6 +109,19 @@ if(window.Tags == undefined) {
     }
 
     /**
+     * Add a list of tags
+     * @param {Array} values 
+     */
+    Tags.prototype.addAll = function(values) {
+      if((values instanceof Array) == false) {
+        throw new Error("ERROR[Tags.addAll] :: parameter is not instance of Array")
+      }
+      values.forEach((value) => {
+        this.addTag(value)
+      })
+    }
+
+    /**
      * Remove tag item
      * @param {number | HTMLElement} tagItem Even tag index or tag element
      */
@@ -116,9 +143,6 @@ if(window.Tags == undefined) {
      */
     Tags.prototype.removeAll = function() {
       this.values = []
-      this.tagItems = []
-      this.dom.tagsWrapper.innerHTML = ""
-      this.dom.tagsWrapper.appendChild(this.dom.inputTags)
     }
 
     /**
@@ -217,20 +241,6 @@ if(window.Tags == undefined) {
      */
     function _onClickTagsWrapper() {
       this.dom.inputTags.focus()
-    }
-
-    /**
-     * Initialze tag value
-     */
-    function _initTagValues() {
-      const tags = this.config.tags
-      if((tags instanceof Array) == false) {
-        throw new Error("ERROR[Tags._addConfigTags] :: tags is not instance of Array")
-      }
-      for (let i = 0; i < tags.length; i++) {
-        const tag = tags[i]
-        this.addTag(tag)
-      }
     }
 
     /**
