@@ -7,7 +7,7 @@ if(window.Tags == undefined) {
     
     const _defaultConfig = Object.freeze({
       el: null,
-      tags: [],
+      initValues: [],
       classList: [],
       disabled: false,
       allowDuplicates: true,
@@ -24,7 +24,7 @@ if(window.Tags == undefined) {
     })
 
     function Tags(config = _defaultConfig) {
-      let _config = _buildConfigObject(config)
+      let _config = _buildConfigObject(_defaultConfig, config)
       let _dom = {
         tagsWrapper: null,
         inputTags: null,
@@ -34,7 +34,14 @@ if(window.Tags == undefined) {
       let _disabled = false
 
       Object.defineProperty(this, "config", {
-        get: () => _config
+        get: () => _config,
+        set: (value) => {
+          _config = _buildConfigObject(_config, value)
+          _checkConfigValues.call(this)
+          _initGUI.call(this)
+          this.values = _config.initValues
+          this.disabled = _config.disabled
+        }
       })
       Object.defineProperty(this, "dom", {
         get: () => _dom
@@ -43,18 +50,13 @@ if(window.Tags == undefined) {
         get: () => _values,
         set: (value) => {
           if((value instanceof Array) == false) {
-            throw new Error("ERROR[Tags.addAll] :: parameter is not instance of Array")
+            throw new Error("ERROR[set.values] :: parameter is not instance of Array")
           }
-          if(value.length == 0) {
-            _values = value
-            this.tagItems = []
-            this.dom.tagsWrapper.innerHTML = ""
-            this.dom.tagsWrapper.appendChild(this.dom.inputTags)
-          }
-          else {
-            this.removeAll()
-            this.addAll(value)
-          }
+          _values = []
+          this.tagItems = []
+          this.dom.tagsWrapper.innerHTML = ""
+          this.dom.tagsWrapper.appendChild(this.dom.inputTags)
+          this.addAll(value)
         },
       })
       Object.defineProperty(this, "tagItems", {
@@ -79,11 +81,8 @@ if(window.Tags == undefined) {
           _disabled = value
         },
       })
-      
-      _checkConfigValues.call(this)
-      _initGUI.call(this)
-      this.values = this.config.tags
-      this.disabled = this.config.disabled
+
+      this.config = _config
     }
 
     /**
@@ -153,6 +152,9 @@ if(window.Tags == undefined) {
      */
     function _initGUI() {
       const targetElement = document.getElementById(this.config.el)
+      if(targetElement == null) {
+        throw new Error("ERROR[_initGUI] :: target element not found")
+      }
       if(targetElement instanceof HTMLDivElement) {
         this.dom.tagsWrapper = targetElement
         this.dom.tagsWrapper.innerHTML = ""
@@ -258,7 +260,7 @@ if(window.Tags == undefined) {
         for (let i = 0; i < disallowedTags.length; i++) {
           const tagItem2 = disallowedTags[i];
           if(tagItem1 == tagItem2) {
-            throw new Error(`ERROR[Tags._checkConfigValues] :: '${tagItem1}' can't be allowed and disallowed value`)
+            throw new Error(`ERROR[_checkConfigValues] :: '${tagItem1}' can't be allowed and disallowed value`)
           }
         }
       }
@@ -286,20 +288,19 @@ if(window.Tags == undefined) {
      * @param {object} config 
      * @returns {object}
      */
-    function _buildConfigObject(config) {
-      const _config = {};
-      const keys = Object.keys(_defaultConfig);
-      const length = keys.length;
-      for (let index = 0; index < length; index++) {
-        const key = keys[index];
+    function _buildConfigObject(base, config) {
+      const _config = {}
+      const keys = Object.keys(base)
+      for (let index = 0; index < keys.length; index++) {
+        const key = keys[index]
         if(config.hasOwnProperty(key) == true) {
-          _config[key] = config[key];
+          _config[key] = config[key]
         }
         else {
-          _config[key] = _defaultConfig[key];
+          _config[key] = base[key]
         }
       }
-      return _config;
+      return _config
     }
   
     return Tags

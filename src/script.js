@@ -1,6 +1,6 @@
-const tags = new Tags({
+window.tagsObj = new Tags({
   el: "tags",
-  tags: ["Couscous", "Tajine"],
+  initValues: ["Couscous", "Tajine"],
   classList: ["custom-tag"],
   placeholder: "Add some food you like...",
   clearOnBlur: true,
@@ -8,4 +8,5 @@ const tags = new Tags({
   allowedTags: ["Couscous", "Tajine", "Bastilla", "Rfisa", "Hrira", "Ma9loba"],
   disallowedTags: ["Batata", "Maticha", "Lkhyar"],
   disabled: false,
+  autoComplete: []
 })
