@@ -1,3 +1,5 @@
+import "./yk-tags.css"
+
 "use strict";
 
 if(window.Tags == undefined) {
@@ -14,6 +16,7 @@ if(window.Tags == undefined) {
       placeholder: "",
       allowedTags: [],
       disallowedTags: [],
+      autoComplete: [],
       onBeforeTagAdd: function() {},
       onTagAdd: function() {},
       onBeforeTagRemove: function() {},
