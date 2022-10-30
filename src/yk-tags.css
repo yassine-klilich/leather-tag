@@ -54,3 +54,35 @@
 .yk-tags.yk-tags--disabled .yk-tags__input {
   display: none;
 }
+
+.yk-tags__autocomplete {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  background-color: #fff;
+  box-shadow: 0px 1px 8px rgb(0 0 0 / 40%);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  max-height: 250px;
+  overflow: auto;
+}
+
+.yk-tags__autocomplete ul {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+}
+
+.yk-tags__autocomplete li {
+  line-height: 26px;
+  padding-left: 12px;
+  padding-right: 12px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.yk-tags__autocomplete li:hover {
+  background-color: #ededed;
+}

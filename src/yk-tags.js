@@ -28,10 +28,12 @@ if(window.Tags == undefined) {
       let _dom = {
         tagsWrapper: null,
         inputTags: null,
+        autoCompleteWrapper: null,
       }
       let _values = []
       let _tagItems = []
       let _disabled = false
+      let _autoComplete = false
 
       Object.defineProperty(this, "config", {
         get: () => _config,
@@ -41,6 +43,7 @@ if(window.Tags == undefined) {
           _initGUI.call(this)
           this.values = _config.initValues
           this.disabled = _config.disabled
+          this.autoComplete = _config.autoComplete
         }
       })
       Object.defineProperty(this, "dom", {
@@ -79,6 +82,17 @@ if(window.Tags == undefined) {
             } break;
           }
           _disabled = value
+        },
+      })
+      Object.defineProperty(this, "autoComplete", {
+        get: () => _autoComplete,
+        set: (value) => {
+          if((value instanceof Array) == false) {
+            throw new Error("ERROR[set.autoComplete] :: parameter is not instance of Array")
+          }
+          _autoComplete = value
+          const clientRect = this.dom.tagsWrapper.getBoundingClientRect()
+          
         },
       })
 
@@ -146,6 +160,8 @@ if(window.Tags == undefined) {
     Tags.prototype.removeAll = function() {
       this.values = []
     }
+
+    Tags.DefaultConfig = _defaultConfig
 
     /**
      * Initialize GUI for tag

@@ -1,13 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body>
-  
-  <div id="tags"></div>
-
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <div id="tags"></div>
+    <div id="tags" class="custom-tag yk-tags">
+      <div class="yk-tags__item">
+        <span class="yk-tags__value">couscous</span
+        ><button class="yk-tags__btn-remove">
+          <svg width="14" height="14" viewBox="0 0 48 48">
+            <path
+              fill="#767676"
+              d="M38 12.83l-2.83-2.83-11.17 11.17-11.17-11.17-2.83 2.83 11.17 11.17-11.17 11.17 2.83 2.83 11.17-11.17 11.17 11.17 2.83-2.83-11.17-11.17z"
+            ></path>
+          </svg>
+        </button>
+      </div>
+      <div class="yk-tags__item">
+        <span class="yk-tags__value">tajine</span
+        ><button class="yk-tags__btn-remove">
+          <svg width="14" height="14" viewBox="0 0 48 48">
+            <path
+              fill="#767676"
+              d="M38 12.83l-2.83-2.83-11.17 11.17-11.17-11.17-2.83 2.83 11.17 11.17-11.17 11.17 2.83 2.83 11.17-11.17 11.17 11.17 2.83-2.83-11.17-11.17z"
+            ></path>
+          </svg>
+        </button>
+      </div>
+      <input class="yk-tags__input" placeholder="Add some food you like..." />
+    </div>
+    <div class="yk-tags__autocomplete">
+      <ul>
+        <li>option 1</li>
+        <li>option 2</li>
+        <li>option 3</li>
+      </ul>
+    </div>
+  </body>
 </html>
