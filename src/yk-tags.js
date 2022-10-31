@@ -27,13 +27,14 @@ if(window.Tags == undefined) {
       let _config = _buildConfigObject(_defaultConfig, config)
       let _dom = {
         tagsWrapper: null,
-        inputTags: null,
+        inputElement: null,
         autoCompleteWrapper: null,
       }
       let _values = []
       let _tagItems = []
       let _disabled = false
       let _autoComplete = false
+      let _onClickDocumentEventHandler = _onClickDocument.bind(this)
 
       Object.defineProperty(this, "config", {
         get: () => _config,
@@ -58,7 +59,7 @@ if(window.Tags == undefined) {
           _values = []
           this.tagItems = []
           this.dom.tagsWrapper.innerHTML = ""
-          this.dom.tagsWrapper.appendChild(this.dom.inputTags)
+          this.dom.tagsWrapper.appendChild(this.dom.inputElement)
           this.addAll(value)
         },
       })
@@ -67,8 +68,8 @@ if(window.Tags == undefined) {
         set: (value) => _tagItems = value,
       })
       Object.defineProperty(this, "inputValue", {
-        get: () => this.dom.inputTags.value,
-        set: (value) => this.dom.inputTags.value = value,
+        get: () => this.dom.inputElement.value,
+        set: (value) => this.dom.inputElement.value = value,
       })
       Object.defineProperty(this, "disabled", {
         get: () => _disabled,
@@ -91,9 +92,13 @@ if(window.Tags == undefined) {
             throw new Error("ERROR[set.autoComplete] :: parameter is not instance of Array")
           }
           _autoComplete = value
-          const clientRect = this.dom.tagsWrapper.getBoundingClientRect()
-          
+          this.dom.autoCompleteWrapper = _buildAutoCompleteDOM.call(this)
+          _setAutoCompleteOptions.call(this, _autoComplete)
         },
+      })
+      Object.defineProperty(this, "_onClickDocumentEventHandler", {
+        get: () => _onClickDocumentEventHandler,
+        set: (value) => _onClickDocumentEventHandler = value,
       })
 
       this.config = _config
@@ -116,7 +121,7 @@ if(window.Tags == undefined) {
       }
       this.config.onBeforeTagAdd()
       const tagItem = _createTagItem.call(this, value)
-      this.dom.tagsWrapper.insertBefore(tagItem, this.dom.inputTags)
+      this.dom.tagsWrapper.insertBefore(tagItem, this.dom.inputElement)
       this.values.push(value)
       this.tagItems.push(tagItem)
       this.config.onTagAdd()
@@ -178,31 +183,36 @@ if(window.Tags == undefined) {
           const classItem = this.config.classList[i]
           this.dom.tagsWrapper.classList.add(classItem)
         }
-        this.dom.inputTags = document.createElement("input")
+        this.dom.inputElement = document.createElement("input")
         this.dom.tagsWrapper.classList.add("yk-tags")
-        this.dom.inputTags.classList.add("yk-tags__input")
-        this.dom.tagsWrapper.appendChild(this.dom.inputTags)
-        this.dom.inputTags.setAttribute("placeholder", this.config.placeholder || "Type and press Enter")
+        this.dom.inputElement.classList.add("yk-tags__input")
+        this.dom.tagsWrapper.appendChild(this.dom.inputElement)
+        this.dom.inputElement.setAttribute("placeholder", this.config.placeholder || "Type and press Enter")
 
         // Add Event Listeners 
         this.dom.tagsWrapper.addEventListener("click", _onClickTagsWrapper.bind(this))
-        this.dom.inputTags.addEventListener("keyup", _onKeyUpInputTags.bind(this))
-        this.dom.inputTags.addEventListener("keydown", _onKeyDownInputTags.bind(this))
-        this.dom.inputTags.addEventListener("blur", _onBlurInputTags.bind(this))
+        this.dom.inputElement.addEventListener("input", _onInputInputTags.bind(this))
+        this.dom.inputElement.addEventListener("keyup", _onKeyUpInputTags.bind(this))
+        this.dom.inputElement.addEventListener("keydown", _onKeyDownInputTags.bind(this))
+        this.dom.inputElement.addEventListener("blur", _onBlurInputTags.bind(this))
       }
     }
 
     /**
      * Event handler for input element
-     * @param {KeyboardEvent} event 
      */
-    function _onKeyUpInputTags(event) {
-      if(event.key == "Enter") {
-        const value = this.inputValue
-        if(value.trim().length > 0) {
-          if(this.addTag(value) != null) {
-            this.inputValue = ""
-          }
+    function _onInputInputTags() {
+      if(this.inputValue.length == 0) {
+        _setAutoCompleteOptions.call(this, this.autoComplete)
+      }
+      else {
+        const matchAutoCompleteOptions = this.autoComplete.filter(item => item.toLowerCase().includes(this.inputValue.toLowerCase()))
+        if(matchAutoCompleteOptions.length > 0) {
+          _setAutoCompleteOptions.call(this, matchAutoCompleteOptions)
+          _showAutoComplete.call(this)
+        }
+        else {
+          _hideAutoComplete.call(this)
         }
       }
     }
@@ -211,9 +221,32 @@ if(window.Tags == undefined) {
      * Event handler for input element
      * @param {KeyboardEvent} event 
      */
+    function _onKeyUpInputTags(event) {
+      if(event.key == "Escape") {
+        this.dom.inputElement.blur()
+        _hideAutoComplete.call(this)
+      }
+    }
+
+    /**
+     * Event handler for input element
+     * @param {KeyboardEvent} event 
+     */
     function _onKeyDownInputTags(event) {
-      if(event.key == "Backspace" && this.inputValue.length == 0) {
-        this.removeTag(this.tagItems.length - 1)
+      switch (event.key) {
+        case "Backspace": {
+          if (this.inputValue.length == 0) {
+            this.removeTag(this.tagItems.length - 1)
+          }
+        } break;
+        case "Enter": {
+          const value = this.inputValue
+          if(value.trim().length > 0) {
+            if(this.addTag(value) != null) {
+              this.inputValue = ""
+            }
+          }
+        } break;
       }
     }
 
@@ -260,8 +293,9 @@ if(window.Tags == undefined) {
     /**
      * On click tag wrapper
      */
-    function _onClickTagsWrapper() {
-      this.dom.inputTags.focus()
+    function _onClickTagsWrapper(event) {
+      event.stopPropagation()
+      this.dom.inputElement.focus()
     }
 
     /**
@@ -297,6 +331,75 @@ if(window.Tags == undefined) {
         return false
       }
       return true
+    }
+
+    /**
+     * Build auto complete DOM
+     * @returns {HTMLElement}
+     */
+    function _buildAutoCompleteDOM() {
+      const autoCompleteWrapper = document.createElement("div")
+      autoCompleteWrapper.classList.add("yk-tags__autocomplete")
+      autoCompleteWrapper.addEventListener("click", (event) => event.stopPropagation())
+      return autoCompleteWrapper
+    }
+
+    /**
+     * Set auto complete position
+     */
+    function _setAutoCompletePosition() {
+      const isDisplayed = getComputedStyle(this.dom.tagsWrapper).display
+      if(this.dom.tagsWrapper.parentElement != undefined && isDisplayed != "none") {
+        const clientRect = this.dom.tagsWrapper.getBoundingClientRect()
+        this.dom.autoCompleteWrapper.style.top = `${clientRect.bottom}px`
+        this.dom.autoCompleteWrapper.style.left = `${clientRect.left}px`
+        this.dom.autoCompleteWrapper.style.width = `${clientRect.width}px`
+      }
+    }
+    
+    /**
+     * Append auto complete
+     */
+    function _showAutoComplete() {
+      if(this.dom.autoCompleteWrapper.parentElement == null) {
+        document.body.appendChild(this.dom.autoCompleteWrapper)
+        _setAutoCompletePosition.call(this)
+      }
+      document.addEventListener("click", this._onClickDocumentEventHandler)
+    }
+    
+    /**
+     * Remove auto complete
+     */
+    function _hideAutoComplete() {
+      if(this.dom.autoCompleteWrapper.parentElement == document.body) {
+        document.body.removeChild(this.dom.autoCompleteWrapper)
+      }
+      document.removeEventListener("click", this._onClickDocumentEventHandler)
+    }
+
+    /**
+     * On click event handler for document
+     */
+    function _onClickDocument() {
+      _hideAutoComplete.call(this)
+    }
+
+    /**
+     * Set auto complete options
+     */
+    function _setAutoCompleteOptions(options) {
+      this.dom.autoCompleteWrapper.innerHTML = ""
+      const autoCompleteUL = document.createElement("ul")
+      for (let i = 0; i < options.length; i++) {
+        const optionText = options[i]
+        const autoCompleteLI = document.createElement("li")
+        const autoCompleteAnchor = document.createElement("a")
+        autoCompleteAnchor.textContent = optionText
+        autoCompleteLI.appendChild(autoCompleteAnchor)
+        autoCompleteUL.appendChild(autoCompleteLI)
+      }
+      this.dom.autoCompleteWrapper.appendChild(autoCompleteUL)
     }
 
     /**

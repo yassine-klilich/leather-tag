@@ -65,6 +65,7 @@
   flex-direction: column;
   max-height: 250px;
   overflow: auto;
+  position: fixed;
 }
 
 .yk-tags__autocomplete ul {
@@ -83,6 +84,7 @@
   cursor: pointer;
 }
 
-.yk-tags__autocomplete li:hover {
+.yk-tags__autocomplete li:hover,
+.yk-tags__autocomplete li.yk-tags__autocomplete-li-focus {
   background-color: #ededed;
 }
