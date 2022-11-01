@@ -11,17 +11,19 @@ if(window.Tags == undefined) {
       classList: [],
       disabled: false,
       allowDuplicates: true,
-      clearOnBlur: false,
       preserveCase: false,
       placeholder: "",
       allowedTags: [],
       disallowedTags: [],
       autoComplete: [],
+      onCreate: function() {},
       onBeforeTagAdd: function() {},
       onTagAdd: function() {},
       onBeforeTagRemove: function() {},
       onTagRemove: function() {}
     })
+
+    Tags.DefaultConfig = _defaultConfig
 
     function Tags(config = _defaultConfig) {
       let _config = _buildConfigObject(_defaultConfig, config)
@@ -34,7 +36,7 @@ if(window.Tags == undefined) {
       let _tagItems = []
       let _disabled = false
       let _autoComplete = false
-      let _onClickDocumentEventHandler = _onClickDocument.bind(this)
+      let _bindFuncHideAutoComplete = _hideAutoComplete.bind(this)
 
       Object.defineProperty(this, "config", {
         get: () => _config,
@@ -96,9 +98,9 @@ if(window.Tags == undefined) {
           _setAutoCompleteOptions.call(this, _autoComplete)
         },
       })
-      Object.defineProperty(this, "_onClickDocumentEventHandler", {
-        get: () => _onClickDocumentEventHandler,
-        set: (value) => _onClickDocumentEventHandler = value,
+      Object.defineProperty(this, "_bindFuncHideAutoComplete", {
+        get: () => _bindFuncHideAutoComplete,
+        set: (value) => _bindFuncHideAutoComplete = value,
       })
 
       this.config = _config
@@ -166,8 +168,6 @@ if(window.Tags == undefined) {
       this.values = []
     }
 
-    Tags.DefaultConfig = _defaultConfig
-
     /**
      * Initialize GUI for tag
      */
@@ -194,7 +194,6 @@ if(window.Tags == undefined) {
         this.dom.inputElement.addEventListener("input", _onInputInputTags.bind(this))
         this.dom.inputElement.addEventListener("keyup", _onKeyUpInputTags.bind(this))
         this.dom.inputElement.addEventListener("keydown", _onKeyDownInputTags.bind(this))
-        this.dom.inputElement.addEventListener("blur", _onBlurInputTags.bind(this))
       }
     }
 
@@ -247,15 +246,6 @@ if(window.Tags == undefined) {
             }
           }
         } break;
-      }
-    }
-
-    /**
-     * On blur input element
-     */
-    function _onBlurInputTags() {
-      if(this.config.clearOnBlur == true) {
-        this.inputValue = ""
       }
     }
 
@@ -321,7 +311,7 @@ if(window.Tags == undefined) {
      * @param {string} value 
      */
     function _isValidTagValue(value) {
-      if(this.config.allowDuplicates == false && this.values.map(item => item.toLowerCase()).includes(value.toLowerCase())) {
+      if(this.config.allowDuplicates == false && _isTagExist.call(this, value)) {
         return false
       }
       if(this.config.allowedTags.length > 0 && this.config.allowedTags.map(item => item.toLowerCase()).includes(value.toLowerCase()) == false) {
@@ -331,6 +321,44 @@ if(window.Tags == undefined) {
         return false
       }
       return true
+    }
+
+    /**
+     * Check if tag value already exists
+     * @param {string} value 
+     */
+    function _isTagExist(value) {
+      const _values = this.values.map(item => item.toLowerCase())
+      const _value = value.toLowerCase()
+      for (let i = 0; i < _values.length; i++) {
+        const item = _values[i]
+        if(_value == item) {
+          _animateMatchedTagElement.call(this, i)
+          return true
+        }
+      }
+      return false
+    }
+
+    /**
+     * Animate matched tag element
+     * @param {number} index 
+     */
+    function _animateMatchedTagElement(index) {
+      if(this._setTimeoutAnimation == null) {
+        this._setTimeoutAnimation = setTimeout(() => {
+          _stopAnimationMatchedTagElement.call(this, index)
+        }, 1000)
+        this.tagItems[index].classList.add("yk-tags__item--animation")
+      }
+    }
+
+    function _stopAnimationMatchedTagElement(index) {
+      if(this._setTimeoutAnimation != null) {
+        this.tagItems[index].classList.remove("yk-tags__item--animation")
+        clearTimeout(this._setTimeoutAnimation)
+        this._setTimeoutAnimation = null
+      }
     }
 
     /**
@@ -365,7 +393,15 @@ if(window.Tags == undefined) {
         document.body.appendChild(this.dom.autoCompleteWrapper)
         _setAutoCompletePosition.call(this)
       }
-      document.addEventListener("click", this._onClickDocumentEventHandler)
+      document.addEventListener("click", this._bindFuncHideAutoComplete)
+      window.addEventListener("resize", this._bindFuncHideAutoComplete)
+      this._scrollParent = _getScrollParent(this.dom.tagsWrapper)
+      if(this._scrollParent != null) {
+        if(this._scrollParent == document.documentElement) {
+          this._scrollParent = document
+        }
+        this._scrollParent.addEventListener("scroll", this._bindFuncHideAutoComplete)
+      }
     }
     
     /**
@@ -375,14 +411,12 @@ if(window.Tags == undefined) {
       if(this.dom.autoCompleteWrapper.parentElement == document.body) {
         document.body.removeChild(this.dom.autoCompleteWrapper)
       }
-      document.removeEventListener("click", this._onClickDocumentEventHandler)
-    }
-
-    /**
-     * On click event handler for document
-     */
-    function _onClickDocument() {
-      _hideAutoComplete.call(this)
+      document.removeEventListener("click", this._bindFuncHideAutoComplete)
+      window.removeEventListener("resize", this._bindFuncHideAutoComplete)
+      if(this._scrollParent != null) {
+        this._scrollParent.removeEventListener("scroll", this._bindFuncHideAutoComplete)
+        this._scrollParent = null
+      }
     }
 
     /**
@@ -392,14 +426,39 @@ if(window.Tags == undefined) {
       this.dom.autoCompleteWrapper.innerHTML = ""
       const autoCompleteUL = document.createElement("ul")
       for (let i = 0; i < options.length; i++) {
-        const optionText = options[i]
+        const optionValue = options[i]
         const autoCompleteLI = document.createElement("li")
-        const autoCompleteAnchor = document.createElement("a")
-        autoCompleteAnchor.textContent = optionText
-        autoCompleteLI.appendChild(autoCompleteAnchor)
+        autoCompleteLI.textContent = optionValue
+        autoCompleteLI.addEventListener("click", _onClickAutoCompleteOption.bind(this, optionValue))
         autoCompleteUL.appendChild(autoCompleteLI)
       }
       this.dom.autoCompleteWrapper.appendChild(autoCompleteUL)
+    }
+
+    /**
+     * On click auto-complete option event handler 
+     */
+    function _onClickAutoCompleteOption(value) {
+      if(this.addTag(value) != null) {
+        this.inputValue = ""
+      }
+    }
+
+    /**
+     * Get scroll parent element
+     * @param {HTMLElement} node 
+     * @returns {null | HTMLElement}
+     */
+    function _getScrollParent(node) {
+      if (node == null) {
+        return null
+      }
+    
+      if (node.scrollHeight > node.clientHeight) {
+        return node
+      } else {
+        return _getScrollParent(node.parentNode)
+      }
     }
 
     /**
