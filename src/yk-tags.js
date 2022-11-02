@@ -104,6 +104,7 @@ if(window.Tags == undefined) {
       })
 
       this.config = _config
+      this.config.onCreate(this)
     }
 
     /**
@@ -169,6 +170,15 @@ if(window.Tags == undefined) {
     }
 
     /**
+     * Get matched auto-complete values
+     * @param {string} value 
+     * @returns {Array}
+     */
+    Tags.prototype.getMatchedAutoCompleteValues = function(value) {
+      return this.autoComplete.filter(item => item.toLowerCase().includes(value))
+    }
+
+    /**
      * Initialize GUI for tag
      */
     function _initGUI() {
@@ -191,9 +201,22 @@ if(window.Tags == undefined) {
 
         // Add Event Listeners 
         this.dom.tagsWrapper.addEventListener("click", _onClickTagsWrapper.bind(this))
+        this.dom.inputElement.addEventListener("focus", _onFocusInputTags.bind(this))
         this.dom.inputElement.addEventListener("input", _onInputInputTags.bind(this))
         this.dom.inputElement.addEventListener("keyup", _onKeyUpInputTags.bind(this))
         this.dom.inputElement.addEventListener("keydown", _onKeyDownInputTags.bind(this))
+      }
+    }
+
+    /**
+     * Event handler for input element
+     */
+    function _onFocusInputTags() {
+      if(this.inputValue.length > 0) {
+        const matchAutoCompleteOptions = this.getMatchedAutoCompleteValues(this.inputValue.toLowerCase())
+        if(matchAutoCompleteOptions.length > 0) {
+          _fillAndShowAutoComplete.call(this, matchAutoCompleteOptions)
+        }
       }
     }
 
@@ -205,10 +228,9 @@ if(window.Tags == undefined) {
         _setAutoCompleteOptions.call(this, this.autoComplete)
       }
       else {
-        const matchAutoCompleteOptions = this.autoComplete.filter(item => item.toLowerCase().includes(this.inputValue.toLowerCase()))
+        const matchAutoCompleteOptions = this.getMatchedAutoCompleteValues(this.inputValue.toLowerCase())
         if(matchAutoCompleteOptions.length > 0) {
-          _setAutoCompleteOptions.call(this, matchAutoCompleteOptions)
-          _showAutoComplete.call(this)
+          _fillAndShowAutoComplete.call(this, matchAutoCompleteOptions)
         }
         else {
           _hideAutoComplete.call(this)
@@ -362,7 +384,7 @@ if(window.Tags == undefined) {
     }
 
     /**
-     * Build auto complete DOM
+     * Build auto-complete DOM
      * @returns {HTMLElement}
      */
     function _buildAutoCompleteDOM() {
@@ -373,7 +395,7 @@ if(window.Tags == undefined) {
     }
 
     /**
-     * Set auto complete position
+     * Set auto-complete position
      */
     function _setAutoCompletePosition() {
       const isDisplayed = getComputedStyle(this.dom.tagsWrapper).display
@@ -386,7 +408,7 @@ if(window.Tags == undefined) {
     }
     
     /**
-     * Append auto complete
+     * Append auto-complete
      */
     function _showAutoComplete() {
       if(this.dom.autoCompleteWrapper.parentElement == null) {
@@ -405,7 +427,7 @@ if(window.Tags == undefined) {
     }
     
     /**
-     * Remove auto complete
+     * Remove auto-complete
      */
     function _hideAutoComplete() {
       if(this.dom.autoCompleteWrapper.parentElement == document.body) {
@@ -420,7 +442,7 @@ if(window.Tags == undefined) {
     }
 
     /**
-     * Set auto complete options
+     * Set auto-complete options
      */
     function _setAutoCompleteOptions(options) {
       this.dom.autoCompleteWrapper.innerHTML = ""
@@ -459,6 +481,14 @@ if(window.Tags == undefined) {
       } else {
         return _getScrollParent(node.parentNode)
       }
+    }
+
+    /**
+     * Fill and show auto-complete
+     */
+    function _fillAndShowAutoComplete(value) {
+      _setAutoCompleteOptions.call(this, value)
+      _showAutoComplete.call(this)
     }
 
     /**

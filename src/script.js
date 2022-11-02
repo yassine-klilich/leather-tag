@@ -3,7 +3,7 @@ window.tagsObj = new Tags({
   initValues: ["Couscous", "Tajine"],
   classList: ["custom-tag"],
   placeholder: "Add some food you like...",
-  allowDuplicates: true,
+  allowDuplicates: false,
   allowedTags: ["Couscous", "Tajine", "Bastilla", "Rfisa", "Hrira", "Ma9loba"],
   disallowedTags: ["Batata", "Maticha", "Lkhyar"],
   disabled: false,
