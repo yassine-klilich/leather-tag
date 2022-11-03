@@ -37,6 +37,8 @@ if(window.Tags == undefined) {
       let _disabled = false
       let _autoComplete = false
       let _bindFuncHideAutoComplete = _hideAutoComplete.bind(this)
+      let _isAutoCompleteOpen = false
+      let _currentFocusedAutoCompleteElement = null
 
       Object.defineProperty(this, "config", {
         get: () => _config,
@@ -94,13 +96,31 @@ if(window.Tags == undefined) {
             throw new Error("ERROR[set.autoComplete] :: parameter is not instance of Array")
           }
           _autoComplete = value
-          this.dom.autoCompleteWrapper = _buildAutoCompleteDOM.call(this)
           _setAutoCompleteOptions.call(this, _autoComplete)
         },
+      })
+      Object.defineProperty(this, "isAutoCompleteOpen", {
+        get: () => _isAutoCompleteOpen,
+        set: (value) => {
+          switch (value) {
+            case true: {
+              _showAutoComplete.call(this)
+              _isAutoCompleteOpen = true
+            } break;
+            case false: {
+              _hideAutoComplete.call(this)
+              _isAutoCompleteOpen = false
+            } break;
+          }
+        }
       })
       Object.defineProperty(this, "_bindFuncHideAutoComplete", {
         get: () => _bindFuncHideAutoComplete,
         set: (value) => _bindFuncHideAutoComplete = value,
+      })
+      Object.defineProperty(this, "_currentFocusedAutoCompleteElement", {
+        get: () => _currentFocusedAutoCompleteElement,
+        set: (value) => _currentFocusedAutoCompleteElement = value,
       })
 
       this.config = _config
@@ -198,6 +218,7 @@ if(window.Tags == undefined) {
         this.dom.inputElement.classList.add("yk-tags__input")
         this.dom.tagsWrapper.appendChild(this.dom.inputElement)
         this.dom.inputElement.setAttribute("placeholder", this.config.placeholder || "Type and press Enter")
+        this.dom.autoCompleteWrapper = _buildAutoCompleteDOM.call(this)
 
         // Add Event Listeners 
         this.dom.tagsWrapper.addEventListener("click", _onClickTagsWrapper.bind(this))
@@ -233,7 +254,7 @@ if(window.Tags == undefined) {
           _fillAndShowAutoComplete.call(this, matchAutoCompleteOptions)
         }
         else {
-          _hideAutoComplete.call(this)
+          this.isAutoCompleteOpen = false
         }
       }
     }
@@ -245,7 +266,7 @@ if(window.Tags == undefined) {
     function _onKeyUpInputTags(event) {
       if(event.key == "Escape") {
         this.dom.inputElement.blur()
-        _hideAutoComplete.call(this)
+        this.isAutoCompleteOpen = false
       }
     }
 
@@ -267,6 +288,12 @@ if(window.Tags == undefined) {
               this.inputValue = ""
             }
           }
+        } break;
+        case "ArrowUp": {
+          _setFocusedAutoCompleteOption.call(this, "previousSibling")
+        } break;
+        case "ArrowDown": {
+          _setFocusedAutoCompleteOption.call(this, "nextSibling")
         } break;
       }
     }
@@ -439,6 +466,10 @@ if(window.Tags == undefined) {
         this._scrollParent.removeEventListener("scroll", this._bindFuncHideAutoComplete)
         this._scrollParent = null
       }
+      if(this._currentFocusedAutoCompleteElement != null) {
+        this._currentFocusedAutoCompleteElement.classList.remove("yk-tags__autocomplete-li--focused")
+        this._currentFocusedAutoCompleteElement = null
+      }
     }
 
     /**
@@ -446,6 +477,8 @@ if(window.Tags == undefined) {
      */
     function _setAutoCompleteOptions(options) {
       this.dom.autoCompleteWrapper.innerHTML = ""
+      this.dom.autoCompleteList = null
+      this._currentFocusedAutoCompleteElement = null
       const autoCompleteUL = document.createElement("ul")
       for (let i = 0; i < options.length; i++) {
         const optionValue = options[i]
@@ -455,6 +488,7 @@ if(window.Tags == undefined) {
         autoCompleteUL.appendChild(autoCompleteLI)
       }
       this.dom.autoCompleteWrapper.appendChild(autoCompleteUL)
+      this.dom.autoCompleteList = autoCompleteUL
     }
 
     /**
@@ -488,7 +522,31 @@ if(window.Tags == undefined) {
      */
     function _fillAndShowAutoComplete(value) {
       _setAutoCompleteOptions.call(this, value)
-      _showAutoComplete.call(this)
+      this.isAutoCompleteOpen = true
+    }
+
+    /**
+     * Set focused class to auto-complete option
+     * @param {string} nextOrPrevious whether 'nextSibling' or 'previousSibling'
+     */
+    function _setFocusedAutoCompleteOption(nextOrPrevious) {
+      if(this.dom.autoCompleteList.childElementCount > 0) {
+        if(this._currentFocusedAutoCompleteElement != null) {
+          this._currentFocusedAutoCompleteElement.classList.remove("yk-tags__autocomplete-li--focused")
+          this._currentFocusedAutoCompleteElement = this._currentFocusedAutoCompleteElement[nextOrPrevious]
+        }
+        if(this._currentFocusedAutoCompleteElement == null) {
+          switch (nextOrPrevious) {
+            case "previousSibling": {
+              this._currentFocusedAutoCompleteElement = this.dom.autoCompleteList.children[this.dom.autoCompleteList.childElementCount - 1]
+            } break;
+            case "nextSibling": {
+              this._currentFocusedAutoCompleteElement = this.dom.autoCompleteList.children[0]
+            } break;
+          }
+        }
+        this._currentFocusedAutoCompleteElement.classList.add("yk-tags__autocomplete-li--focused")
+      }
     }
 
     /**

@@ -98,7 +98,7 @@
 }
 
 .yk-tags__autocomplete li:hover,
-.yk-tags__autocomplete li.yk-tags__autocomplete-li-focus {
+.yk-tags__autocomplete li.yk-tags__autocomplete-li--focused {
   background-color: #ededed;
 }
 
