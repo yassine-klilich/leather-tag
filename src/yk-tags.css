@@ -48,6 +48,10 @@
   background-color: #ddd;
 }
 
+.yk-tags__btn-remove svg path {
+  fill: #767676;
+}
+
 .yk-tags__input {
   margin: 0;
   padding: 0;
