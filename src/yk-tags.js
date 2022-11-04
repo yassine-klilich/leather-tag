@@ -17,12 +17,25 @@ if(window.Tags == undefined) {
       disallowedTags: [],
       autoComplete: [],
       regexPattern: null,
+      maxTags: null,
+      onClick: function() {},
       onCreate: function() {},
       onBeforeTagAdd: function() {},
       onTagAdd: function() {},
       onBeforeTagRemove: function() {},
       onTagRemove: function() {},
-      onTagInvalid: function() {},
+      onInvalidTag: function() {},
+      onShowAutoComptele: function() {},
+      onHideAutoComptele: function() {},
+      onSelectAutoCompleteOption: function() {},
+      onFocus: function() {},
+      onBlur: function() {},
+      onInput: function() {},
+      onMaxTags: function() {},
+      //mixed: false,
+      //minTags: null,
+      //forceAutoCompleteOptions: false,
+      //onEdit: function() {},
     })
 
     Tags.DefaultConfig = _defaultConfig
@@ -148,11 +161,15 @@ if(window.Tags == undefined) {
         throw new Error(`ERROR[Tags.addTag] :: ${value} is not type of string`)
       }
       value = value.trim()
+      if(this.config.maxTags != null && this.values.length == this.config.maxTags) {
+        this.config.onMaxTags(this)
+        return
+      }
       if(this.config.preserveCase == false) {
         value = value.toLowerCase()
       }
       if(this.isValueValid(value) == false) {
-        this.config.onTagInvalid(value)
+        this.config.onInvalidTag(value)
         return
       }
       this.config.onBeforeTagAdd(this)
@@ -185,7 +202,7 @@ if(window.Tags == undefined) {
      * @param {number | HTMLElement} tagItem Even tag index or tag element
      */
     Tags.prototype.removeTag = function(tagItem) {
-      this.config.onBeforeTagRemove()
+      this.config.onBeforeTagRemove(this)
       for (let i = 0; i < this.tagItems.length; i++) {
         if(i == tagItem || this.tagItems[i] == tagItem) {
           this.dom.tagsWrapper.removeChild(this.tagItems[i])
@@ -194,7 +211,7 @@ if(window.Tags == undefined) {
           break
         }
       }
-      this.config.onTagRemove()
+      this.config.onTagRemove(this)
     }
 
     /**
@@ -287,6 +304,7 @@ if(window.Tags == undefined) {
         // Add Event Listeners 
         this.dom.tagsWrapper.addEventListener("click", _onClickTagsWrapper.bind(this))
         this.dom.inputElement.addEventListener("focus", _onFocusInputTags.bind(this))
+        this.dom.inputElement.addEventListener("blur", _onBlurInputTags.bind(this))
         this.dom.inputElement.addEventListener("input", _onInputInputTags.bind(this))
         this.dom.inputElement.addEventListener("keyup", _onKeyUpInputTags.bind(this))
         this.dom.inputElement.addEventListener("keydown", _onKeyDownInputTags.bind(this))
@@ -296,19 +314,27 @@ if(window.Tags == undefined) {
     /**
      * Event handler for input element
      */
-    function _onFocusInputTags() {
+    function _onFocusInputTags(event) {
       if(this.inputValue.length > 0) {
         const matchAutoCompleteOptions = this.getMatchedAutoCompleteValues(this.inputValue.toLowerCase())
         if(matchAutoCompleteOptions.length > 0) {
           _fillAndShowAutoComplete.call(this, matchAutoCompleteOptions)
         }
       }
+      this.config.onFocus(event, this)
     }
 
     /**
      * Event handler for input element
      */
-    function _onInputInputTags() {
+    function _onBlurInputTags(event) {
+      this.config.onBlur(event, this)
+    }
+
+    /**
+     * Event handler for input element
+     */
+    function _onInputInputTags(event) {
       if(this.inputValue.length == 0) {
         _buildAutoCompleteOptions.call(this, this.autoComplete)
       }
@@ -321,6 +347,7 @@ if(window.Tags == undefined) {
           this.hideAutoComplete()
         }
       }
+      this.config.onInput(event, this)
     }
 
     /**
@@ -356,16 +383,16 @@ if(window.Tags == undefined) {
         } break;
       }
       if(this.autoComplete != null && this.autoComplete.length > 0) {
-        let value = ""
         switch (event.key) {
           case "ArrowUp": {
-            value = _setFocusedAutoCompleteOption.call(this, "previousSibling")
+            let value = _setFocusedAutoCompleteOption.call(this, "previousElementSibling")
+            this.inputValue = (value == null) ? "" : value
           } break;
           case "ArrowDown": {
-            value = _setFocusedAutoCompleteOption.call(this, "nextSibling")
+            let value = _setFocusedAutoCompleteOption.call(this, "nextElementSibling")
+            this.inputValue = (value == null) ? "" : value
           } break;
         }
-        this.inputValue = (value == null) ? "" : value
       }
     }
 
@@ -404,6 +431,7 @@ if(window.Tags == undefined) {
      * On click tag wrapper
      */
     function _onClickTagsWrapper(event) {
+      this.config.onClick(event, this)
       event.stopPropagation()
       this.dom.inputElement.focus()
     }
@@ -499,15 +527,16 @@ if(window.Tags == undefined) {
       if(this.dom.autoCompleteWrapper.parentElement == null) {
         document.body.appendChild(this.dom.autoCompleteWrapper)
         _setAutoCompletePosition.call(this)
-      }
-      document.addEventListener("click", this._bindFuncHideAutoComplete)
-      window.addEventListener("resize", this._bindFuncHideAutoComplete)
-      this._scrollParent = _getScrollParent(this.dom.tagsWrapper)
-      if(this._scrollParent != null) {
-        if(this._scrollParent == document.documentElement) {
-          this._scrollParent = document
+        document.addEventListener("click", this._bindFuncHideAutoComplete)
+        window.addEventListener("resize", this._bindFuncHideAutoComplete)
+        this._scrollParent = _getScrollParent(this.dom.tagsWrapper)
+        if(this._scrollParent != null) {
+          if(this._scrollParent == document.documentElement) {
+            this._scrollParent = document
+          }
+          this._scrollParent.addEventListener("scroll", this._bindFuncHideAutoComplete)
         }
-        this._scrollParent.addEventListener("scroll", this._bindFuncHideAutoComplete)
+        this.config.onShowAutoComptele(this)
       }
     }
     
@@ -517,18 +546,19 @@ if(window.Tags == undefined) {
     function _hideAutoComplete() {
       if(this.dom.autoCompleteWrapper.parentElement == document.body) {
         document.body.removeChild(this.dom.autoCompleteWrapper)
+        document.removeEventListener("click", this._bindFuncHideAutoComplete)
+        window.removeEventListener("resize", this._bindFuncHideAutoComplete)
+        if(this._scrollParent != null) {
+          this._scrollParent.removeEventListener("scroll", this._bindFuncHideAutoComplete)
+          this._scrollParent = null
+        }
+        if(this._currentFocusedAutoCompleteElement != null) {
+          this._currentFocusedAutoCompleteElement.classList.remove("yk-tags__autocomplete-li--focused")
+          this._currentFocusedAutoCompleteElement = null
+        }
+        this.shownAutoCompleteOptions = []
+        this.config.onHideAutoComptele(this)
       }
-      document.removeEventListener("click", this._bindFuncHideAutoComplete)
-      window.removeEventListener("resize", this._bindFuncHideAutoComplete)
-      if(this._scrollParent != null) {
-        this._scrollParent.removeEventListener("scroll", this._bindFuncHideAutoComplete)
-        this._scrollParent = null
-      }
-      if(this._currentFocusedAutoCompleteElement != null) {
-        this._currentFocusedAutoCompleteElement.classList.remove("yk-tags__autocomplete-li--focused")
-        this._currentFocusedAutoCompleteElement = null
-      }
-      this.shownAutoCompleteOptions = []
     }
 
     /**
@@ -557,6 +587,7 @@ if(window.Tags == undefined) {
      * On click auto-complete option event handler 
      */
     function _onClickAutoCompleteOption(value) {
+      this.config.onSelectAutoCompleteOption(this, value)
       if(this.addTag(value) != null) {
         this.inputValue = ""
       }
@@ -600,10 +631,10 @@ if(window.Tags == undefined) {
         }
         if(this._currentFocusedAutoCompleteElement == null) {
           switch (nextOrPrevious) {
-            case "previousSibling": {
+            case "previousElementSibling": {
               this._currentFocusedAutoCompleteElement = this.dom.autoCompleteList.children[this.dom.autoCompleteList.childElementCount - 1]
             } break;
-            case "nextSibling": {
+            case "nextElementSibling": {
               this._currentFocusedAutoCompleteElement = this.dom.autoCompleteList.children[0]
             } break;
           }
