@@ -3,6 +3,10 @@ import "./yk-tags.css"
 "use strict";
 
 if(window.Tags == undefined) {
+
+  /**
+   * Tagger Class
+   */
   window.Tags = (function() {
     
     const _defaultConfig = Object.freeze({
@@ -18,6 +22,7 @@ if(window.Tags == undefined) {
       autoComplete: [],
       regexPattern: null,
       maxTags: null,
+      showAutoCompleteAfter: null,
       onClick: function() {},
       onCreate: function() {},
       onBeforeTagAdd: function() {},
@@ -60,12 +65,14 @@ if(window.Tags == undefined) {
       Object.defineProperty(this, "config", {
         get: () => _config,
         set: (value) => {
-          _config = _buildConfigObject(_config, value)
-          _checkConfigValues.call(this)
-          _initGUI.call(this)
-          this.values = _config.initValues
-          this.disabled = _config.disabled
-          this.autoComplete = _config.autoComplete
+          if(value != null && Object.keys(value).length > 0) {
+            _config = _buildConfigObject(_config, value)
+            _checkConfigValues.call(this)
+            _initGUI.call(this)
+            this.values = _config.initValues
+            this.disabled = _config.disabled
+            this.autoComplete = _config.autoComplete
+          }
         }
       })
       Object.defineProperty(this, "dom", {
@@ -434,6 +441,7 @@ if(window.Tags == undefined) {
       this.config.onClick(event, this)
       event.stopPropagation()
       this.dom.inputElement.focus()
+      this.showAutoComplete()
     }
 
     /**
@@ -524,7 +532,8 @@ if(window.Tags == undefined) {
      * Append auto-complete
      */
     function _showAutoComplete() {
-      if(this.dom.autoCompleteWrapper.parentElement == null) {
+      const showAutoCompleteAfter = this.config.showAutoCompleteAfter
+      if(this.dom.autoCompleteWrapper.parentElement == null && (showAutoCompleteAfter == null || this.inputValue.length == showAutoCompleteAfter)) {
         document.body.appendChild(this.dom.autoCompleteWrapper)
         _setAutoCompletePosition.call(this)
         document.addEventListener("click", this._bindFuncHideAutoComplete)
@@ -665,5 +674,26 @@ if(window.Tags == undefined) {
     }
   
     return Tags
+  })()
+
+  /**
+   * TagItem Class
+   */
+  window.TagItem = (function() {
+
+    const _defaultConfig = Object.freeze({
+      disabled: false,
+      readonly: false,
+      value: null,
+      classList: [],
+      template: ()=>{},
+      onClick: ()=>{},
+    })
+
+    function TagItem(config = _defaultConfig) {
+
+    }
+
+    return TagItem
   })()
 }
