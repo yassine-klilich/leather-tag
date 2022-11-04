@@ -11,11 +11,10 @@ if(window.Tags == undefined) {
     
     const _defaultConfig = Object.freeze({
       el: null,
-      initValues: [],
+      initialTags: [],
       classList: [],
       disabled: false,
       allowDuplicates: true,
-      preserveCase: false,
       placeholder: "",
       allowedTags: [],
       disallowedTags: [],
@@ -57,7 +56,7 @@ if(window.Tags == undefined) {
       let _disabled = false
       let _autoComplete = []
       let _shownAutoCompleteOptions = []
-      let _bindFuncHideAutoComplete = _hideAutoComplete.bind(this)
+      let _bindFuncHideAutoComplete = Tags.prototype.hideAutoComplete.bind(this)
       let _autoCompleteOpen = false
       let _currentFocusedAutoCompleteElement = null
       let _preventAddingTag = false
@@ -69,7 +68,7 @@ if(window.Tags == undefined) {
             _config = _buildConfigObject(_config, value)
             _checkConfigValues.call(this)
             _initGUI.call(this)
-            this.values = _config.initValues
+            this.values = _config.initialTags
             this.disabled = _config.disabled
             this.autoComplete = _config.autoComplete
           }
@@ -161,31 +160,49 @@ if(window.Tags == undefined) {
 
     /**
      * Add tag item
-     * @param {string} value 
+     * @param {string | object | TagItem} value 
      */
-    Tags.prototype.addTag = function(value) {
-      if(typeof value != "string") {
-        throw new Error(`ERROR[Tags.addTag] :: ${value} is not type of string`)
-      }
-      value = value.trim()
-      if(this.config.maxTags != null && this.values.length == this.config.maxTags) {
-        this.config.onMaxTags(this)
-        return
-      }
-      if(this.config.preserveCase == false) {
-        value = value.toLowerCase()
-      }
-      if(this.isValueValid(value) == false) {
-        this.config.onInvalidTag(value)
-        return
+    Tags.prototype.addTag = function(param) {
+      if(param == null) {
+        throw new Error(`ERROR[Tags.addTag] :: parameter should not be null`)
       }
       this.config.onBeforeTagAdd(this)
       if(this._preventAddingTag == false) {
-        const tagItem = _createTagItem.call(this, value)
-        this.dom.tagsWrapper.insertBefore(tagItem, this.dom.inputElement)
-        this.values.push(value)
+        if(this.config.maxTags != null && this.values.length == this.config.maxTags) {
+          this.config.onMaxTags(this)
+          return
+        }
+        let _value = null
+        if(typeof param == "string" || param instanceof String) {
+          _value = param.toString()
+        } else if(param instanceof TagItem) {
+          _value = param.value
+        } else {
+          if(param.value == undefined) {
+            throw new Error(`ERROR[Tags.addTag] :: Please provide a value`)
+          }
+          _value = param.value
+        }
+
+        if(this.isValueValid(_value) == false) {
+          this.config.onInvalidTag(_value)
+          return
+        }
+        let tagItem = null
+        if(param instanceof TagItem) {
+          tagItem = param
+        }
+        else {
+          tagItem = new TagItem({
+            tagger: this,
+            value: _value
+          })
+        }
+        this.dom.tagsWrapper.insertBefore(tagItem.dom, this.dom.inputElement)
+        this.values.push(_value)
         this.tagItems.push(tagItem)
         this.config.onTagAdd(this)
+
         return tagItem
       }
       this._preventAddingTag = false
@@ -206,26 +223,30 @@ if(window.Tags == undefined) {
 
     /**
      * Remove tag item
-     * @param {number | HTMLElement} tagItem Even tag index or tag element
+     * @param {number | TagItem} tagItem Even tag index or tag element
      */
     Tags.prototype.removeTag = function(tagItem) {
       this.config.onBeforeTagRemove(this)
+      let _removedTagItem = null
       for (let i = 0; i < this.tagItems.length; i++) {
         if(i == tagItem || this.tagItems[i] == tagItem) {
-          this.dom.tagsWrapper.removeChild(this.tagItems[i])
+          this.dom.tagsWrapper.removeChild(this.tagItems[i].dom)
           this.values.splice(i, 1)
-          this.tagItems.splice(i, 1)
+          _removedTagItem = this.tagItems.splice(i, 1)[0]
           break
         }
       }
       this.config.onTagRemove(this)
+      return _removedTagItem
     }
 
     /**
      * Remove all tags
      */
     Tags.prototype.removeAll = function() {
-      this.values = []
+      for (let i = 0; i < this.tagItems.length; i++) {
+        this.removeTag(this.tagItems[i])
+      }
     }
 
     /**
@@ -404,44 +425,15 @@ if(window.Tags == undefined) {
     }
 
     /**
-     * Create tag item element
-     * @param {string} value 
-     * @returns {HTMLElement} created tag item element
-     */
-    function _createTagItem(value) {
-      const tagItem = document.createElement("div")
-      const tagValue = document.createElement("span")
-      const btnRemoveTag = document.createElement("button")
-
-      tagItem.classList.add("yk-tags__item")
-      tagValue.classList.add("yk-tags__value")
-      btnRemoveTag.classList.add("yk-tags__btn-remove")
-      btnRemoveTag.innerHTML = `<svg width="14" height="14" viewBox="0 0 48 48"><path d="M38 12.83l-2.83-2.83-11.17 11.17-11.17-11.17-2.83 2.83 11.17 11.17-11.17 11.17 2.83 2.83 11.17-11.17 11.17 11.17 2.83-2.83-11.17-11.17z"/></svg>`
-      btnRemoveTag.addEventListener("click", _onClickBtnRemoveTag.bind(this, tagItem))
-
-      tagValue.textContent = value
-      tagItem.appendChild(tagValue)
-      tagItem.appendChild(btnRemoveTag)
-
-      return tagItem
-    }
-
-    /**
-     * On click button remove tag
-     * @param {HTMLElement} tagItem 
-     */
-    function _onClickBtnRemoveTag(tagItem) {
-      this.removeTag(tagItem)
-    }
-
-    /**
      * On click tag wrapper
      */
     function _onClickTagsWrapper(event) {
       this.config.onClick(event, this)
       event.stopPropagation()
       this.dom.inputElement.focus()
-      this.showAutoComplete()
+      if(this.autoCompleteOpen == false) {
+        _fillAndShowAutoComplete.call(this, this.autoComplete)
+      }
     }
 
     /**
@@ -488,7 +480,7 @@ if(window.Tags == undefined) {
         this._setTimeoutAnimation = setTimeout(() => {
           _stopAnimationMatchedTagElement.call(this, index)
         }, 1000)
-        this.tagItems[index].classList.add("yk-tags__item--animation")
+        this.tagItems[index].dom.classList.add("yk-tags__item--animation")
       }
     }
 
@@ -498,7 +490,7 @@ if(window.Tags == undefined) {
      */
     function _stopAnimationMatchedTagElement(index) {
       if(this._setTimeoutAnimation != null) {
-        this.tagItems[index].classList.remove("yk-tags__item--animation")
+        this.tagItems[index].dom.classList.remove("yk-tags__item--animation")
         clearTimeout(this._setTimeoutAnimation)
         this._setTimeoutAnimation = null
       }
@@ -682,16 +674,101 @@ if(window.Tags == undefined) {
   window.TagItem = (function() {
 
     const _defaultConfig = Object.freeze({
+      tagger: null,
       disabled: false,
       readonly: false,
       value: null,
+      data: null,
       classList: [],
       template: ()=>{},
       onClick: ()=>{},
     })
 
     function TagItem(config = _defaultConfig) {
+      let _config = _buildConfigObject(_defaultConfig, config)
+      let _tagger = _config.tagger
+      let _dom = null
+      let _value = _config.value
+      let _data = _config.data
 
+      Object.defineProperty(this, "tagger", {
+        get: () => _tagger,
+        set: (value) => _tagger = value,
+      })
+      Object.defineProperty(this, "config", {
+        get: () => _config,
+      })
+      Object.defineProperty(this, "dom", {
+        get: () => _dom,
+      })
+      Object.defineProperty(this, "value", {
+        get: () => _value,
+        set: (value) => _value = value,
+      })
+      Object.defineProperty(this, "data", {
+        get: () => _data,
+        set: (value) => _data = value,
+      })
+
+      _dom = _buildDOM.call(this)
+    }
+
+    /**
+     * Remove tag item
+     */
+    TagItem.prototype.remove = function() {
+      this.tagger.removeTag(this)
+    }
+
+    /**
+     * Build DOM tag item
+     * @returns {HTMLElement}
+     */
+    function _buildDOM() {
+      const tagItem = document.createElement("div")
+      const tagValue = document.createElement("span")
+      const btnRemoveTag = document.createElement("button")
+
+      tagItem.classList.add("yk-tags__item")
+      tagValue.classList.add("yk-tags__value")
+      btnRemoveTag.classList.add("yk-tags__btn-remove")
+      btnRemoveTag.innerHTML = `<svg width="14" height="14" viewBox="0 0 48 48"><path d="M38 12.83l-2.83-2.83-11.17 11.17-11.17-11.17-2.83 2.83 11.17 11.17-11.17 11.17 2.83 2.83 11.17-11.17 11.17 11.17 2.83-2.83-11.17-11.17z"/></svg>`
+      btnRemoveTag.addEventListener("click", _onClickBtnRemoveTag.bind(this))
+
+      tagValue.textContent = this.value
+      tagItem.appendChild(tagValue)
+      tagItem.appendChild(btnRemoveTag)
+
+      return tagItem
+    }
+
+    /**
+     * On click button remove tag
+     * @param {PointerEvent} event
+     */
+    function _onClickBtnRemoveTag(event) {
+      event.stopPropagation()
+      this.remove(this)
+    }
+
+    /**
+     * Builds config object based on the default configs
+     * @param {object} config 
+     * @returns {object}
+     */
+    function _buildConfigObject(base, config) {
+      const _config = {}
+      const keys = Object.keys(base)
+      for (let index = 0; index < keys.length; index++) {
+        const key = keys[index]
+        if(config.hasOwnProperty(key) == true) {
+          _config[key] = config[key]
+        }
+        else {
+          _config[key] = base[key]
+        }
+      }
+      return _config
     }
 
     return TagItem
