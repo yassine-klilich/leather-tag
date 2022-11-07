@@ -3,11 +3,11 @@ window.tagsObj = new Tags({
   initialTags: [
     "Couscous",
     "Tajine",
-    {
+    new TagItem({
       value: "Pizza",
       disabled: true,
       classList: ["pizza-class"]
-    },
+    }),
     new TagItem({value: "Tacos"})
   ],
   classList: ["custom-tag"],

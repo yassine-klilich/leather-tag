@@ -162,7 +162,7 @@ if(window.Tags == undefined) {
 
     /**
      * Add tag item
-     * @param {string | object | TagItem} value 
+     * @param {string | TagItem} value 
      */
     Tags.prototype.addTag = function(param) {
       if(param == null) {
@@ -174,34 +174,29 @@ if(window.Tags == undefined) {
           this.config.onMaxTags(this)
           return
         }
-        let _value = null
+        if(typeof param != "string" && !(param instanceof String) && !(param instanceof TagItem)) {
+          throw new Error("ERROR[Tags.addTag] :: param is not type of string or TagItem")
+        }
+        let _tagItemConfig = {}
         if(typeof param == "string" || param instanceof String) {
-          _value = param.toString()
-        } else if(param instanceof TagItem) {
-          _value = param.value
-        } else {
-          if(param.value == undefined) {
-            throw new Error(`ERROR[Tags.addTag] :: Please provide a value`)
-          }
-          _value = param.value
+          _tagItemConfig.value = param.toString()
         }
 
-        if(this.isValueValid(_value) == false) {
-          this.config.onInvalidTag(_value)
+        if(this.isValueValid(_tagItemConfig.value) == false) {
+          this.config.onInvalidTag(_tagItemConfig.value)
           return
         }
         let tagItem = null
         if(param instanceof TagItem) {
           tagItem = param
+          tagItem.tagger = this
         }
         else {
-          tagItem = new TagItem({
-            tagger: this,
-            value: _value
-          })
+          _tagItemConfig.tagger = this
+          tagItem = new TagItem(_tagItemConfig)
         }
         this.dom.tagsWrapper.insertBefore(tagItem.dom, this.dom.inputElement)
-        this.values.push(_value)
+        this.values.push(_tagItemConfig.value)
         this.tagItems.push(tagItem)
         this.config.onTagAdd(this)
 
@@ -690,10 +685,14 @@ if(window.Tags == undefined) {
 
     function TagItem(config = _defaultConfig) {
       let _config = _buildConfigObject(_defaultConfig, config)
+      if(_config.value == null) {
+        throw new Error(`ERROR[TagItem] :: Please provide a tag value`)
+      }
+      let _value = _config.value
       let _tagger = _config.tagger
       let _dom = null
-      let _value = _config.value
       let _data = _config.data
+      let _disabled = false
 
       Object.defineProperty(this, "tagger", {
         get: () => _tagger,
@@ -713,8 +712,24 @@ if(window.Tags == undefined) {
         get: () => _data,
         set: (value) => _data = value,
       })
+      Object.defineProperty(this, "disabled", {
+        get: () => _disabled,
+        set: (value) => {
+          switch (value) {
+            case true: {
+              _disabled = true
+              this.dom.classList.add("yk-tags__item--disabled")
+            } break;
+            case false: {
+              _disabled = false
+              this.dom.classList.remove("yk-tags__item--disabled")
+            } break;
+          }
+        },
+      })
 
       _dom = _buildDOM.call(this)
+      this.disabled = _config.disabled
     }
 
     /**
