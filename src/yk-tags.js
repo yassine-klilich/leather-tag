@@ -181,6 +181,9 @@ if(window.Tags == undefined) {
         if(typeof param == "string" || param instanceof String) {
           _tagItemConfig.value = param.toString()
         }
+        else {
+          _tagItemConfig = param.config
+        }
 
         if(this.isValueValid(_tagItemConfig.value) == false) {
           this.config.onInvalidTag(_tagItemConfig.value)
@@ -689,7 +692,7 @@ if(window.Tags == undefined) {
         throw new Error(`ERROR[TagItem] :: Please provide a tag value`)
       }
       let _value = _config.value
-      let _tagger = _config.tagger
+      let _tagger = null
       let _dom = null
       let _data = _config.data
       let _disabled = false
@@ -730,6 +733,7 @@ if(window.Tags == undefined) {
 
       _dom = _buildDOM.call(this)
       this.disabled = _config.disabled
+      this.tagger = _config.tagger
     }
 
     /**
