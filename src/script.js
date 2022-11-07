@@ -20,7 +20,7 @@ window.tagsObj = new Tags({
   onInvalidTag: function(value) {
     console.log(`%c'${value}' is an invalid value`, 'background: red; padding: 2px; border-radius: 4px; color: #fff')
   },
-  onTagRemove: function() {
+  onAllRemoved: function() {
     console.log("1111");
   }
 })

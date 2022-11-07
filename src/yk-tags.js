@@ -26,8 +26,10 @@ if(window.Tags == undefined) {
       onCreate: function() {},
       onBeforeTagAdd: function() {},
       onTagAdd: function() {},
+      onAllAdded: function() {},
       onBeforeTagRemove: function() {},
       onTagRemove: function() {},
+      onAllRemoved: function() {},
       onInvalidTag: function() {},
       onShowAutoComptele: function() {},
       onHideAutoComptele: function() {},
@@ -219,6 +221,7 @@ if(window.Tags == undefined) {
       values.forEach((value) => {
         this.addTag(value)
       })
+      this.config.onAllAdded()
     }
 
     /**
@@ -244,9 +247,10 @@ if(window.Tags == undefined) {
      * Remove all tags
      */
     Tags.prototype.removeAll = function() {
-      for (let i = 0; i < this.tagItems.length; i++) {
+      for (let i = 0; i < this.tagItems.length;) {
         this.removeTag(this.tagItems[i])
       }
+      this.config.onAllRemoved()
     }
 
     /**
