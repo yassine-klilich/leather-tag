@@ -1,13 +1,13 @@
-import "./yk-tags.css"
+import "./leather-tag.css"
 
 "use strict";
 
-if(window.Tags == undefined) {
+if(window.LeatherTag == undefined) {
 
   /**
-   * Tagger Class
+   * LeatherTag Class
    */
-  window.Tags = (function() {
+  window.LeatherTag = (function() {
     
     const _defaultConfig = Object.freeze({
       el: null,
@@ -44,9 +44,9 @@ if(window.Tags == undefined) {
       //onEdit: function() {},
     })
 
-    Tags.DefaultConfig = _defaultConfig
+    LeatherTag.DefaultConfig = _defaultConfig
 
-    function Tags(config = _defaultConfig) {
+    function LeatherTag(config = _defaultConfig) {
       let _config = _buildConfigObject(_defaultConfig, config)
       let _dom = {
         tagsWrapper: null,
@@ -58,7 +58,7 @@ if(window.Tags == undefined) {
       let _disabled = false
       let _autoComplete = []
       let _shownAutoCompleteOptions = []
-      let _bindFuncHideAutoComplete = Tags.prototype.hideAutoComplete.bind(this)
+      let _bindFuncHideAutoComplete = LeatherTag.prototype.hideAutoComplete.bind(this)
       let _autoCompleteOpen = false
       let _currentFocusedAutoCompleteElement = null
       let _preventAddingTag = false
@@ -164,9 +164,9 @@ if(window.Tags == undefined) {
      * Add tag item
      * @param {string | TagItem} value 
      */
-    Tags.prototype.addTag = function(param) {
+    LeatherTag.prototype.addTag = function(param) {
       if(param == null) {
-        throw new Error(`ERROR[Tags.addTag] :: parameter should not be null`)
+        throw new Error(`ERROR[LeatherTag.addTag] :: parameter should not be null`)
       }
       this.config.onBeforeTagAdd(this)
       if(this._preventAddingTag == false) {
@@ -175,7 +175,7 @@ if(window.Tags == undefined) {
           return
         }
         if(typeof param != "string" && !(param instanceof String) && !(param instanceof TagItem)) {
-          throw new Error("ERROR[Tags.addTag] :: param is not type of string or TagItem")
+          throw new Error("ERROR[LeatherTag.addTag] :: param is not type of string or TagItem")
         }
         let _tagItemConfig = {}
         if(typeof param == "string" || param instanceof String) {
@@ -192,13 +192,13 @@ if(window.Tags == undefined) {
         let tagItem = null
         if(param instanceof TagItem) {
           tagItem = param
-          tagItem.tagger = this
+          tagItem.leatherTag = this
         }
         else {
-          _tagItemConfig.tagger = this
+          _tagItemConfig.leatherTag = this
           tagItem = new TagItem(_tagItemConfig)
         }
-        this.dom.tagsWrapper.insertBefore(tagItem.dom, this.dom.inputElement)
+        this.dom.tagsWrapper.insertBefore(tagItem.dom.tagItem, this.dom.inputElement)
         this.values.push(_tagItemConfig.value)
         this.tagItems.push(tagItem)
         this.config.onTagAdd(this)
@@ -212,9 +212,9 @@ if(window.Tags == undefined) {
      * Add a list of tags
      * @param {Array} values 
      */
-    Tags.prototype.addAll = function(values) {
+    LeatherTag.prototype.addAll = function(values) {
       if((values instanceof Array) == false) {
-        throw new Error("ERROR[Tags.addAll] :: parameter is not instance of Array")
+        throw new Error("ERROR[LeatherTag.addAll] :: parameter is not instance of Array")
       }
       values.forEach((value) => {
         this.addTag(value)
@@ -226,7 +226,7 @@ if(window.Tags == undefined) {
      * Remove tag item
      * @param {number | TagItem} tagItem Even tag index or tag element
      */
-    Tags.prototype.removeTag = function(tagItem) {
+    LeatherTag.prototype.removeTag = function(tagItem) {
       this.config.onBeforeTagRemove(this)
       let _removedTagItem = null
       for (let i = 0; i < this.tagItems.length; i++) {
@@ -244,7 +244,7 @@ if(window.Tags == undefined) {
     /**
      * Remove all tags
      */
-    Tags.prototype.removeAll = function() {
+    LeatherTag.prototype.removeAll = function() {
       for (let i = 0; i < this.tagItems.length;) {
         this.removeTag(this.tagItems[i])
       }
@@ -256,28 +256,28 @@ if(window.Tags == undefined) {
      * @param {string} value 
      * @returns {Array}
      */
-    Tags.prototype.getMatchedAutoCompleteValues = function(value) {
+    LeatherTag.prototype.getMatchedAutoCompleteValues = function(value) {
       return this.autoComplete.filter(item => item.toLowerCase().includes(value))
     }
 
     /**
      * Show auto-complete
      */
-    Tags.prototype.showAutoComplete = function() {
+    LeatherTag.prototype.showAutoComplete = function() {
       this.autoCompleteOpen = true
     }
 
     /**
      * Hide auto-complete
      */
-    Tags.prototype.hideAutoComplete = function() {
+    LeatherTag.prototype.hideAutoComplete = function() {
       this.autoCompleteOpen = false
     }
 
     /**
      * Prevent adding new tag
      */
-    Tags.prototype.preventAddTag = function() {
+    LeatherTag.prototype.preventAddTag = function() {
       this._preventAddingTag = true
     }
 
@@ -289,7 +289,7 @@ if(window.Tags == undefined) {
      * @param {string} value 
      * @returns {boolean} true if valid, otherwise false
      */
-    Tags.prototype.isValueValid = function(value) {
+    LeatherTag.prototype.isValueValid = function(value) {
       // Check if it matches regex pattern
       if(this.config.regexPattern != null && this.config.regexPattern.test(value) == false) {
         return false
@@ -667,7 +667,7 @@ if(window.Tags == undefined) {
       return _config
     }
   
-    return Tags
+    return LeatherTag
   })()
 
   /**
@@ -676,7 +676,7 @@ if(window.Tags == undefined) {
   window.TagItem = (function() {
 
     const _defaultConfig = Object.freeze({
-      tagger: null,
+      leatherTag: null,
       disabled: false,
       readonly: false,
       value: null,
@@ -692,14 +692,14 @@ if(window.Tags == undefined) {
         throw new Error(`ERROR[TagItem] :: Please provide a tag value`)
       }
       let _value = _config.value
-      let _tagger = null
+      let _leatherTag = null
       let _dom = null
       let _data = _config.data
       let _disabled = false
 
-      Object.defineProperty(this, "tagger", {
-        get: () => _tagger,
-        set: (value) => _tagger = value,
+      Object.defineProperty(this, "leatherTag", {
+        get: () => _leatherTag,
+        set: (value) => _leatherTag = value,
       })
       Object.defineProperty(this, "config", {
         get: () => _config,
@@ -721,11 +721,13 @@ if(window.Tags == undefined) {
           switch (value) {
             case true: {
               _disabled = true
-              this.dom.classList.add("yk-tags__item--disabled")
+              this.dom.tagItem.classList.add("yk-tags__item--disabled")
+              this.dom.tagItem.removeChild(this.dom.tagDeleteBtn)
             } break;
             case false: {
               _disabled = false
-              this.dom.classList.remove("yk-tags__item--disabled")
+              this.dom.tagItem.classList.remove("yk-tags__item--disabled")
+              this.dom.tagItem.appendChild(this.dom.tagDeleteBtn)
             } break;
           }
         },
@@ -733,19 +735,19 @@ if(window.Tags == undefined) {
 
       _dom = _buildDOM.call(this)
       this.disabled = _config.disabled
-      this.tagger = _config.tagger
+      this.leatherTag = _config.leatherTag
     }
 
     /**
      * Remove tag item
      */
     TagItem.prototype.remove = function() {
-      this.tagger.removeTag(this)
+      this.leatherTag.removeTag(this)
     }
 
     /**
      * Build DOM tag item
-     * @returns {HTMLElement}
+     * @returns {object} contains tagItem and tagDeleteBtn
      */
     function _buildDOM() {
       const tagItem = document.createElement("div")
@@ -762,7 +764,10 @@ if(window.Tags == undefined) {
       tagItem.appendChild(tagValue)
       tagItem.appendChild(btnRemoveTag)
 
-      return tagItem
+      return {
+        tagItem: tagItem,
+        tagDeleteBtn: btnRemoveTag
+      }
     }
 
     /**

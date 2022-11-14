@@ -1,4 +1,4 @@
-window.tagsObj = new Tags({
+window.tagsObj = new LeatherTag({
   el: "tags",
   initialTags: [
     "Couscous",

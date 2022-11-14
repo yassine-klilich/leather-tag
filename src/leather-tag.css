@@ -29,6 +29,9 @@
   -webkit-animation-name: ykTagItemAnimation;
   animation-name: ykTagItemAnimation;
 }
+.yk-tags__item--disabled {
+  padding-right: 6px;
+}
 
 .yk-tags__value {
   font-size: 14px;

@@ -2,7 +2,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
   entry: {
-    "yk-tags": "./src/yk-tags.js",
+    "leather-tag": "./src/leather-tag.js",
     script: "./src/script.js"
   },
   module: {

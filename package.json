@@ -1,5 +1,5 @@
 {
-  "name": "yk-tags",
+  "name": "leather-tag",
   "version": "1.0.0",
   "description": "",
   "scripts": {
@@ -9,15 +9,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yassine-klilich/yk-tags.git"
+    "url": "git+https://github.com/yassine-klilich/leather-tag.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/yassine-klilich/yk-tags/issues"
+    "url": "https://github.com/yassine-klilich/leather-tag/issues"
   },
-  "homepage": "https://github.com/yassine-klilich/yk-tags#readme",
+  "homepage": "https://github.com/yassine-klilich/leather-tag#readme",
   "devDependencies": {
     "css-loader": "^6.7.1",
     "css-minimizer-webpack-plugin": "^4.2.2",
