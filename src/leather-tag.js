@@ -231,7 +231,7 @@ if(window.LeatherTag == undefined) {
       let _removedTagItem = null
       for (let i = 0; i < this.tagItems.length; i++) {
         if(i == tagItem || this.tagItems[i] == tagItem) {
-          this.dom.tagsWrapper.removeChild(this.tagItems[i].dom)
+          this.dom.tagsWrapper.removeChild(this.tagItems[i].dom.tagItem)
           this.values.splice(i, 1)
           _removedTagItem = this.tagItems.splice(i, 1)[0]
           break
