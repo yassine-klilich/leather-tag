@@ -30,11 +30,17 @@
   animation-name: leatherTagItemAnimation;
 }
 .leather-tag__item--disabled {
+  cursor: default;
   padding-right: 6px;
+  background-image: repeating-linear-gradient(-45deg, #f7f7f7 0 3px, #bfbfbf 3px 6px);
 }
 
 .leather-tag__value {
   font-size: 14px;
+}
+
+.leather-tag__value[contenteditable="true"] {
+  outline: none;
 }
 
 .leather-tag__btn-remove {

@@ -74,7 +74,6 @@ if(window.LeatherTag == undefined) {
         inputElement: null,
         autoCompleteWrapper: null,
       }
-      let _values = []
       let _tagItems = []
       let _disabled = false
       let _autoComplete = []
@@ -101,12 +100,11 @@ if(window.LeatherTag == undefined) {
         get: () => _dom
       })
       Object.defineProperty(this, "values", {
-        get: () => _values,
+        get: () => this.tagItems.map(item => item.value),
         set: (value) => {
           if((value instanceof Array) == false) {
             throw new Error("ERROR[set.values] :: parameter is not instance of Array")
           }
-          _values = []
           this.tagItems = []
           this.dom.tagsWrapper.innerHTML = ""
           this.dom.tagsWrapper.appendChild(this.dom.inputElement)
@@ -191,7 +189,7 @@ if(window.LeatherTag == undefined) {
       }
       this.config.onBeforeTagAdd(this)
       if(this._preventAddingTag == false) {
-        if(this.config.maxTags != null && this.values.length == this.config.maxTags) {
+        if(this.config.maxTags != null && this.tagItems.length == this.config.maxTags) {
           this.config.onMaxTags(this)
           return
         }
@@ -220,7 +218,6 @@ if(window.LeatherTag == undefined) {
           tagItem = new TagItem(_tagItemConfig)
         }
         this.dom.tagsWrapper.insertBefore(tagItem.dom.tagItem, this.dom.inputElement)
-        this.values.push(_tagItemConfig.value)
         this.tagItems.push(tagItem)
         this.config.onTagAdd(this)
 
@@ -253,7 +250,6 @@ if(window.LeatherTag == undefined) {
       for (let i = 0; i < this.tagItems.length; i++) {
         if(i == tagItem || this.tagItems[i] == tagItem) {
           this.dom.tagsWrapper.removeChild(this.tagItems[i].dom.tagItem)
-          this.values.splice(i, 1)
           _removedTagItem = this.tagItems.splice(i, 1)[0]
           break
         }
@@ -715,7 +711,10 @@ if(window.LeatherTag == undefined) {
       })
       Object.defineProperty(this, "value", {
         get: () => _value,
-        set: (value) => _value = value,
+        set: (value) => {
+          _value = value
+          this.dom.tagValue.textContent = value
+        },
       })
       Object.defineProperty(this, "data", {
         get: () => _data,
@@ -775,31 +774,78 @@ if(window.LeatherTag == undefined) {
     function _buildDOM() {
       const tagItem = document.createElement("div")
       const tagValue = document.createElement("span")
-      const btnRemoveTag = document.createElement("button")
+      const tagDeleteBtn = document.createElement("button")
 
+      // Tag item wrapper
       tagItem.classList.add("leather-tag__item")
+      tagItem.addEventListener("click", (event) => event.stopPropagation())
+      tagItem.addEventListener("dblclick", _onDblClickTagItem.bind(this))
+      
+      // Tag value
       tagValue.classList.add("leather-tag__value")
-      btnRemoveTag.classList.add("leather-tag__btn-remove")
-      btnRemoveTag.innerHTML = `<svg width="14" height="14" viewBox="0 0 48 48"><path d="M38 12.83l-2.83-2.83-11.17 11.17-11.17-11.17-2.83 2.83 11.17 11.17-11.17 11.17 2.83 2.83 11.17-11.17 11.17 11.17 2.83-2.83-11.17-11.17z"/></svg>`
-      btnRemoveTag.addEventListener("click", _onClickBtnRemoveTag.bind(this))
+      tagValue.addEventListener("keydown", _onKeydownTagValue.bind(this))
+      tagValue.addEventListener("blur", _onBlurTagValue.bind(this))
+      
+      // Delete button
+      tagDeleteBtn.classList.add("leather-tag__btn-remove")
+      tagDeleteBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 48 48"><path d="M38 12.83l-2.83-2.83-11.17 11.17-11.17-11.17-2.83 2.83 11.17 11.17-11.17 11.17 2.83 2.83 11.17-11.17 11.17 11.17 2.83-2.83-11.17-11.17z"/></svg>`
+      tagDeleteBtn.addEventListener("click", _onClickTagDeleteBtn.bind(this))
 
       tagValue.textContent = this.value
       tagItem.appendChild(tagValue)
-      tagItem.appendChild(btnRemoveTag)
+      tagItem.appendChild(tagDeleteBtn)
 
-      return {
-        tagItem: tagItem,
-        tagDeleteBtn: btnRemoveTag
-      }
+      return { tagItem, tagValue, tagDeleteBtn }
     }
 
     /**
      * On click button remove tag
      * @param {PointerEvent} event
      */
-    function _onClickBtnRemoveTag(event) {
+    function _onClickTagDeleteBtn(event) {
       event.stopPropagation()
       this.remove(this)
+    }
+
+    /**
+     * On double click tag item
+     * @param {PointerEvent} event
+     */
+    function _onDblClickTagItem(event) {
+      event.stopPropagation()
+      if(this.disabled == false) {
+        this.dom.tagValue.setAttribute("contenteditable", true)
+      }
+    }
+
+    /**
+     * On key down tag value
+     * @param {KeyboardEvent} event
+     */
+    function _onKeydownTagValue(event) {
+      if (event.key == "Enter") {
+        event.preventDefault()
+        _unfocusAndUpdateValue.call(this)
+      }
+      if (event.key == "Escape") {
+        this.dom.tagValue.setAttribute("contenteditable", false)
+        this.value = this.value
+      }
+    }
+
+    /**
+     * On blur tag value
+     */
+    function _onBlurTagValue() {
+      _unfocusAndUpdateValue.call(this)
+    }
+
+    /**
+     * Unfocus from tag value element and update tag item value
+     */
+    function _unfocusAndUpdateValue() {
+      this.dom.tagValue.setAttribute("contenteditable", false)
+      this.value = this.dom.tagValue.textContent
     }
 
     return TagItem
