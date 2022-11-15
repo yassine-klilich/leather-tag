@@ -1,4 +1,4 @@
-.yk-tags {
+.leather-tag {
   padding: 6px;
   border: 1px solid #acacac;
   border-radius: 4px;
@@ -7,7 +7,7 @@
   flex-wrap: wrap;
 }
 
-.yk-tags__item {
+.leather-tag__item {
   display: flex;
   align-items: center;
   column-gap: 4px;
@@ -17,27 +17,27 @@
   border-radius: 4px;
   line-height: 20px;
 }
-.yk-tags__item.yk-tags__item--animation {
-  -webkit-animation-duration: 1s;
-  animation-duration: 1s;
-  -webkit-animation-duration: 1s;
-  animation-duration: 1s;
+.leather-tag__item.leather-tag__item--animation {
+  position: relative;
+  z-index: 1;
+  -webkit-animation-duration: 0.5s;
+  animation-duration: 0.5s;
   -webkit-animation-fill-mode: both;
   animation-fill-mode: both;
   -webkit-animation-timing-function: ease-in-out;
   animation-timing-function: ease-in-out;
-  -webkit-animation-name: ykTagItemAnimation;
-  animation-name: ykTagItemAnimation;
+  -webkit-animation-name: leatherTagItemAnimation;
+  animation-name: leatherTagItemAnimation;
 }
-.yk-tags__item--disabled {
+.leather-tag__item--disabled {
   padding-right: 6px;
 }
 
-.yk-tags__value {
+.leather-tag__value {
   font-size: 14px;
 }
 
-.yk-tags__btn-remove {
+.leather-tag__btn-remove {
   padding: 2px;
   margin: 0;
   line-height: 0;
@@ -47,15 +47,15 @@
   cursor: pointer;
   border-radius: 50%;
 }
-.yk-tags__btn-remove:hover {
+.leather-tag__btn-remove:hover {
   background-color: #ddd;
 }
 
-.yk-tags__btn-remove svg path {
+.leather-tag__btn-remove svg path {
   fill: #767676;
 }
 
-.yk-tags__input {
+.leather-tag__input {
   margin: 0;
   padding: 0;
   border: none;
@@ -66,15 +66,15 @@
   font-size: 14px;
 }
 
-.yk-tags.yk-tags--disabled .yk-tags__item {
+.leather-tag.leather-tag--disabled .leather-tag__item {
   padding-right: 6px;
 }
-.yk-tags.yk-tags--disabled .yk-tags__btn-remove,
-.yk-tags.yk-tags--disabled .yk-tags__input {
+.leather-tag.leather-tag--disabled .leather-tag__btn-remove,
+.leather-tag.leather-tag--disabled .leather-tag__input {
   display: none;
 }
 
-.yk-tags__autocomplete {
+.leather-tag__autocomplete {
   padding-top: 8px;
   padding-bottom: 8px;
   background-color: #fff;
@@ -87,7 +87,7 @@
   position: fixed;
 }
 
-.yk-tags__autocomplete ul {
+.leather-tag__autocomplete ul {
   margin: 0;
   padding: 0;
   display: flex;
@@ -95,7 +95,7 @@
   list-style: none;
 }
 
-.yk-tags__autocomplete li {
+.leather-tag__autocomplete li {
   line-height: 26px;
   padding-left: 12px;
   padding-right: 12px;
@@ -104,59 +104,51 @@
   cursor: pointer;
 }
 
-.yk-tags__autocomplete li:hover,
-.yk-tags__autocomplete li.yk-tags__autocomplete-li--focused {
+.leather-tag__autocomplete li:hover,
+.leather-tag__autocomplete li.leather-tag__autocomplete-li--focused {
   background-color: #ededed;
 }
 
-@-webkit-keyframes ykTagItemAnimation {
+@-webkit-keyframes leatherTagItemAnimation {
   0% {
     -webkit-transform: translateX(0);
     transform: translateX(0);
   }
-  10% {
-    -webkit-transform: translateX(-6px) rotateY(-9deg);
-    transform: translateX(-6px) rotateY(-9deg);
-  }
-  20% {
-    -webkit-transform: translateX(5px) rotateY(7deg);
-    transform: translateX(5px) rotateY(7deg);
-  }
-  30% {
-    -webkit-transform: translateX(-3px) rotateY(-5deg);
-    transform: translateX(-3px) rotateY(-5deg);
-  }
-  45% {
-    -webkit-transform: translateX(2px) rotateY(3deg);
-    transform: translateX(2px) rotateY(3deg);
+  25% {
+    -webkit-transform: translateX(5px);
+    transform: translateX(5px);
   }
   50% {
+    -webkit-transform: translateX(-5px);
+    transform: translateX(-5px);
+  }
+  75% {
+    -webkit-transform: translateX(5px);
+    transform: translateX(5px);
+  }
+  100% {
     -webkit-transform: translateX(0);
     transform: translateX(0);
   }
 }
-@keyframes ykTagItemAnimation {
+@keyframes leatherTagItemAnimation {
   0% {
     -webkit-transform: translateX(0);
     transform: translateX(0);
   }
-  10% {
-    -webkit-transform: translateX(-6px) rotateY(-9deg);
-    transform: translateX(-6px) rotateY(-9deg);
-  }
-  20% {
-    -webkit-transform: translateX(5px) rotateY(7deg);
-    transform: translateX(5px) rotateY(7deg);
-  }
-  30% {
-    -webkit-transform: translateX(-3px) rotateY(-5deg);
-    transform: translateX(-3px) rotateY(-5deg);
-  }
-  45% {
-    -webkit-transform: translateX(2px) rotateY(3deg);
-    transform: translateX(2px) rotateY(3deg);
+  25% {
+    -webkit-transform: translateX(5px);
+    transform: translateX(5px);
   }
   50% {
+    -webkit-transform: translateX(-5px);
+    transform: translateX(-5px);
+  }
+  75% {
+    -webkit-transform: translateX(5px);
+    transform: translateX(5px);
+  }
+  100% {
     -webkit-transform: translateX(0);
     transform: translateX(0);
   }

@@ -105,10 +105,10 @@ if(window.LeatherTag == undefined) {
         set: (value) => {
           switch (value) {
             case true: {
-              this.dom.tagsWrapper.classList.add("yk-tags--disabled")
+              this.dom.tagsWrapper.classList.add("leather-tag--disabled")
             } break;
             case false: {
-              this.dom.tagsWrapper.classList.remove("yk-tags--disabled")
+              this.dom.tagsWrapper.classList.remove("leather-tag--disabled")
             } break;
           }
           _disabled = value
@@ -325,8 +325,8 @@ if(window.LeatherTag == undefined) {
           this.dom.tagsWrapper.classList.add(classItem)
         }
         this.dom.inputElement = document.createElement("input")
-        this.dom.tagsWrapper.classList.add("yk-tags")
-        this.dom.inputElement.classList.add("yk-tags__input")
+        this.dom.tagsWrapper.classList.add("leather-tag")
+        this.dom.inputElement.classList.add("leather-tag__input")
         this.dom.tagsWrapper.appendChild(this.dom.inputElement)
         this.dom.inputElement.setAttribute("placeholder", this.config.placeholder || "Type and press Enter")
         this.dom.autoCompleteWrapper = _buildAutoCompleteDOM.call(this)
@@ -482,7 +482,7 @@ if(window.LeatherTag == undefined) {
         this._setTimeoutAnimation = setTimeout(() => {
           _stopAnimationMatchedTagElement.call(this, index)
         }, 1000)
-        this.tagItems[index].dom.classList.add("yk-tags__item--animation")
+        this.tagItems[index].dom.tagItem.classList.add("leather-tag__item--animation")
       }
     }
 
@@ -492,7 +492,7 @@ if(window.LeatherTag == undefined) {
      */
     function _stopAnimationMatchedTagElement(index) {
       if(this._setTimeoutAnimation != null) {
-        this.tagItems[index].dom.classList.remove("yk-tags__item--animation")
+        this.tagItems[index].dom.tagItem.classList.remove("leather-tag__item--animation")
         clearTimeout(this._setTimeoutAnimation)
         this._setTimeoutAnimation = null
       }
@@ -504,7 +504,7 @@ if(window.LeatherTag == undefined) {
      */
     function _buildAutoCompleteDOM() {
       const autoCompleteWrapper = document.createElement("div")
-      autoCompleteWrapper.classList.add("yk-tags__autocomplete")
+      autoCompleteWrapper.classList.add("leather-tag__autocomplete")
       autoCompleteWrapper.addEventListener("click", (event) => event.stopPropagation())
       return autoCompleteWrapper
     }
@@ -556,7 +556,7 @@ if(window.LeatherTag == undefined) {
           this._scrollParent = null
         }
         if(this._currentFocusedAutoCompleteElement != null) {
-          this._currentFocusedAutoCompleteElement.classList.remove("yk-tags__autocomplete-li--focused")
+          this._currentFocusedAutoCompleteElement.classList.remove("leather-tag__autocomplete-li--focused")
           this._currentFocusedAutoCompleteElement = null
         }
         this.shownAutoCompleteOptions = []
@@ -629,7 +629,7 @@ if(window.LeatherTag == undefined) {
     function _setFocusedAutoCompleteOption(nextOrPrevious) {
       if(this.dom.autoCompleteList.childElementCount > 0) {
         if(this._currentFocusedAutoCompleteElement != null) {
-          this._currentFocusedAutoCompleteElement.classList.remove("yk-tags__autocomplete-li--focused")
+          this._currentFocusedAutoCompleteElement.classList.remove("leather-tag__autocomplete-li--focused")
           this._currentFocusedAutoCompleteElement = this._currentFocusedAutoCompleteElement[nextOrPrevious]
         }
         if(this._currentFocusedAutoCompleteElement == null) {
@@ -642,7 +642,7 @@ if(window.LeatherTag == undefined) {
             } break;
           }
         }
-        this._currentFocusedAutoCompleteElement.classList.add("yk-tags__autocomplete-li--focused")
+        this._currentFocusedAutoCompleteElement.classList.add("leather-tag__autocomplete-li--focused")
         return this.shownAutoCompleteOptions[parseInt(this._currentFocusedAutoCompleteElement.dataset.index)]
       }
     }
@@ -726,12 +726,12 @@ if(window.LeatherTag == undefined) {
           switch (value) {
             case true: {
               _disabled = true
-              this.dom.tagItem.classList.add("yk-tags__item--disabled")
+              this.dom.tagItem.classList.add("leather-tag__item--disabled")
               this.dom.tagItem.removeChild(this.dom.tagDeleteBtn)
             } break;
             case false: {
               _disabled = false
-              this.dom.tagItem.classList.remove("yk-tags__item--disabled")
+              this.dom.tagItem.classList.remove("leather-tag__item--disabled")
               this.dom.tagItem.appendChild(this.dom.tagDeleteBtn)
             } break;
           }
@@ -776,9 +776,9 @@ if(window.LeatherTag == undefined) {
       const tagValue = document.createElement("span")
       const btnRemoveTag = document.createElement("button")
 
-      tagItem.classList.add("yk-tags__item")
-      tagValue.classList.add("yk-tags__value")
-      btnRemoveTag.classList.add("yk-tags__btn-remove")
+      tagItem.classList.add("leather-tag__item")
+      tagValue.classList.add("leather-tag__value")
+      btnRemoveTag.classList.add("leather-tag__btn-remove")
       btnRemoveTag.innerHTML = `<svg width="14" height="14" viewBox="0 0 48 48"><path d="M38 12.83l-2.83-2.83-11.17 11.17-11.17-11.17-2.83 2.83 11.17 11.17-11.17 11.17 2.83 2.83 11.17-11.17 11.17 11.17 2.83-2.83-11.17-11.17z"/></svg>`
       btnRemoveTag.addEventListener("click", _onClickBtnRemoveTag.bind(this))
 
