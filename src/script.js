@@ -24,3 +24,9 @@ window.tagsObj = new LeatherTag({
     console.log("1111");
   }
 })
+window.customTag = new LeatherTag({
+  el: "customTag",
+  initialTags: [
+    "Mlokhiya"
+  ]
+})

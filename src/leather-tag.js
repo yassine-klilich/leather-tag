@@ -699,7 +699,12 @@ if(window.LeatherTag == undefined) {
 
       Object.defineProperty(this, "leatherTag", {
         get: () => _leatherTag,
-        set: (value) => _leatherTag = value,
+        set: (value) => {
+          if(value != null && !(value instanceof LeatherTag)) {
+            throw new Error("ERROR[TagItem] :: value is not instance of LeatherTag")
+          }
+          _leatherTag = value
+        },
       })
       Object.defineProperty(this, "config", {
         get: () => _config,
@@ -742,7 +747,24 @@ if(window.LeatherTag == undefined) {
      * Remove tag item
      */
     TagItem.prototype.remove = function() {
-      this.leatherTag.removeTag(this)
+      if(this.leatherTag) {
+        this.leatherTag.removeTag(this)
+        this.leatherTag = null
+      }
+    }
+
+    /**
+     * Change tag item leatherTag object
+     * @param {LeatherTag | null} value
+     */
+    TagItem.prototype.setLeatherTag = function(value) {
+      if(value == this.leatherTag) {
+        return
+      }
+      this.remove()
+      if(value instanceof LeatherTag) {
+        value.addTag(this)
+      }
     }
 
     /**
