@@ -45,9 +45,30 @@ if(window.LeatherTag == undefined) {
     })
 
     LeatherTag.DefaultConfig = _defaultConfig
+    
+    /**
+     * Builds config object based on the default configs
+     * @param {object} base 
+     * @param {object} config 
+     * @returns {object}
+     */
+    LeatherTag._buildConfigObject = function(base, config) {
+      const _config = {}
+      const keys = Object.keys(base)
+      for (let index = 0; index < keys.length; index++) {
+        const key = keys[index]
+        if(config.hasOwnProperty(key) == true) {
+          _config[key] = config[key]
+        }
+        else {
+          _config[key] = base[key]
+        }
+      }
+      return _config
+    }
 
     function LeatherTag(config = _defaultConfig) {
-      let _config = _buildConfigObject(_defaultConfig, config)
+      let _config = _defaultConfig
       let _dom = {
         tagsWrapper: null,
         inputElement: null,
@@ -67,7 +88,7 @@ if(window.LeatherTag == undefined) {
         get: () => _config,
         set: (value) => {
           if(value != null && Object.keys(value).length > 0) {
-            _config = _buildConfigObject(_config, value)
+            _config = LeatherTag._buildConfigObject(_config, value)
             _checkConfigValues.call(this)
             _initGUI.call(this)
             this.values = _config.initialTags
@@ -156,7 +177,7 @@ if(window.LeatherTag == undefined) {
         set: (value) => _preventAddingTag = value,
       })
 
-      this.config = _config
+      this.config = config
       this.config.onCreate(this)
     }
 
@@ -646,26 +667,6 @@ if(window.LeatherTag == undefined) {
         return this.shownAutoCompleteOptions[parseInt(this._currentFocusedAutoCompleteElement.dataset.index)]
       }
     }
-
-    /**
-     * Builds config object based on the default configs
-     * @param {object} config 
-     * @returns {object}
-     */
-    function _buildConfigObject(base, config) {
-      const _config = {}
-      const keys = Object.keys(base)
-      for (let index = 0; index < keys.length; index++) {
-        const key = keys[index]
-        if(config.hasOwnProperty(key) == true) {
-          _config[key] = config[key]
-        }
-        else {
-          _config[key] = base[key]
-        }
-      }
-      return _config
-    }
   
     return LeatherTag
   })()
@@ -687,7 +688,7 @@ if(window.LeatherTag == undefined) {
     })
 
     function TagItem(config = _defaultConfig) {
-      let _config = _buildConfigObject(_defaultConfig, config)
+      let _config = LeatherTag._buildConfigObject(_defaultConfig, config)
       if(_config.value == null) {
         throw new Error(`ERROR[TagItem] :: Please provide a tag value`)
       }
@@ -799,26 +800,6 @@ if(window.LeatherTag == undefined) {
     function _onClickBtnRemoveTag(event) {
       event.stopPropagation()
       this.remove(this)
-    }
-
-    /**
-     * Builds config object based on the default configs
-     * @param {object} config 
-     * @returns {object}
-     */
-    function _buildConfigObject(base, config) {
-      const _config = {}
-      const keys = Object.keys(base)
-      for (let index = 0; index < keys.length; index++) {
-        const key = keys[index]
-        if(config.hasOwnProperty(key) == true) {
-          _config[key] = config[key]
-        }
-        else {
-          _config[key] = base[key]
-        }
-      }
-      return _config
     }
 
     return TagItem
