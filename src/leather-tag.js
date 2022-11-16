@@ -166,12 +166,12 @@ if(window.LeatherTag == undefined) {
         set: (value) => {
           switch (value) {
             case true: {
-              _showAutoComplete.call(this)
               _autoCompleteOpen = true
+              _showAutoComplete.call(this)
             } break;
             case false: {
-              _hideAutoComplete.call(this)
               _autoCompleteOpen = false
+              _hideAutoComplete.call(this)
             } break;
           }
         }
@@ -233,6 +233,7 @@ if(window.LeatherTag == undefined) {
         }
         this.dom.tagsWrapper.insertBefore(tagItem.dom.tagItem, this.dom.inputElement)
         this.tagItems.push(tagItem)
+        _setAutoCompletePosition.call(this)
         this.config.onTagAdded.call(this, tagItem)
 
         return tagItem
@@ -251,7 +252,7 @@ if(window.LeatherTag == undefined) {
       values.forEach((value) => {
         this.addTag(value)
       })
-      this.config.onAllAdded.call(this, )
+      this.config.onAllAdded.call(this)
     }
 
     /**
@@ -268,6 +269,7 @@ if(window.LeatherTag == undefined) {
           break
         }
       }
+      _setAutoCompletePosition.call(this)
       this.config.onTagRemoved.call(this, _removedTagItem)
       return _removedTagItem
     }
@@ -544,12 +546,14 @@ if(window.LeatherTag == undefined) {
      * Set auto-complete position
      */
     function _setAutoCompletePosition() {
-      const isDisplayed = getComputedStyle(this.dom.tagsWrapper).display
-      if(this.dom.tagsWrapper.parentElement != undefined && isDisplayed != "none") {
-        const clientRect = this.dom.tagsWrapper.getBoundingClientRect()
-        this.dom.autoCompleteWrapper.style.top = `${clientRect.bottom}px`
-        this.dom.autoCompleteWrapper.style.left = `${clientRect.left}px`
-        this.dom.autoCompleteWrapper.style.width = `${clientRect.width}px`
+      if(this.autoCompleteOpen) {
+        const isDisplayed = getComputedStyle(this.dom.tagsWrapper).display
+        if(this.dom.tagsWrapper.parentElement != undefined && isDisplayed != "none") {
+          const clientRect = this.dom.tagsWrapper.getBoundingClientRect()
+          this.dom.autoCompleteWrapper.style.top = `${clientRect.bottom}px`
+          this.dom.autoCompleteWrapper.style.left = `${clientRect.left}px`
+          this.dom.autoCompleteWrapper.style.width = `${clientRect.width}px`
+        }
       }
     }
     
