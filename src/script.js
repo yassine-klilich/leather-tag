@@ -6,9 +6,22 @@ window.tagsObj = new LeatherTag({
     new TagItem({
       value: "Pizza",
       disabled: true,
-      classList: ["pizza-class"]
+      classList: ["pizza-class"],
+      template: {
+        tagValue: function() {
+          return `<strong class='custom-classname'>${this.value}</strong>`
+        }
+      }
     }),
-    new TagItem({value: "Tacos"})
+    new TagItem({
+      value: "Tacos",
+      data: "Helloooo !",
+      template: {
+        tagValue: function() {
+          return `<i>${this.value}</i>`
+        },
+      }
+    })
   ],
   classList: ["custom-tag"],
   placeholder: "Add some food you like...",

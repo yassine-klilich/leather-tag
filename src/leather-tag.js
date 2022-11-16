@@ -117,7 +117,7 @@ if(window.LeatherTag == undefined) {
         get: () => this.tagItems.map(item => item.value),
         set: (value) => {
           if((value instanceof Array) == false) {
-            throw new Error("ERROR[set.values] :: parameter is not instance of Array")
+            throw new TypeError("ERROR[set.values] :: parameter is not instance of Array")
           }
           this.tagItems = []
           this.dom.tagsWrapper.innerHTML = ""
@@ -151,7 +151,7 @@ if(window.LeatherTag == undefined) {
         get: () => _autoComplete,
         set: (value) => {
           if((value instanceof Array) == false) {
-            throw new Error("ERROR[set.autoComplete] :: parameter is not instance of Array")
+            throw new TypeError("ERROR[set.autoComplete] :: parameter is not instance of Array")
           }
           _autoComplete = value
           _buildAutoCompleteOptions.call(this, _autoComplete)
@@ -208,7 +208,7 @@ if(window.LeatherTag == undefined) {
           return
         }
         if(typeof param != "string" && !(param instanceof String) && !(param instanceof TagItem)) {
-          throw new Error("ERROR[LeatherTag.addTag] :: param is not type of string or TagItem")
+          throw new TypeError("ERROR[LeatherTag.addTag] :: param is not type of string or TagItem")
         }
         let _tagItemConfig = {}
         if(typeof param == "string" || param instanceof String) {
@@ -247,7 +247,7 @@ if(window.LeatherTag == undefined) {
      */
     LeatherTag.prototype.addAll = function(values) {
       if((values instanceof Array) == false) {
-        throw new Error("ERROR[LeatherTag.addAll] :: parameter is not instance of Array")
+        throw new TypeError("ERROR[LeatherTag.addAll] :: parameter is not instance of Array")
       }
       values.forEach((value) => {
         this.addTag(value)
@@ -697,7 +697,15 @@ if(window.LeatherTag == undefined) {
       value: null,
       data: null,
       classList: [],
-      template: ()=>{},
+      template: {
+        tagItem: () => document.createElement("div"),
+        tagValue: () => document.createElement("span"),
+        tagRemoveButton: () => {
+          const tagRemoveButton = document.createElement("button")
+          tagRemoveButton.innerHTML = `<svg width="14" height="14" viewBox="0 0 48 48"><path d="M38 12.83l-2.83-2.83-11.17 11.17-11.17-11.17-2.83 2.83 11.17 11.17-11.17 11.17 2.83 2.83 11.17-11.17 11.17 11.17 2.83-2.83-11.17-11.17z"/></svg>`
+          return tagRemoveButton
+        },
+      },
       onClick: ()=>{},
     })
 
@@ -716,7 +724,7 @@ if(window.LeatherTag == undefined) {
         get: () => _leatherTag,
         set: (value) => {
           if(value != null && !(value instanceof LeatherTag)) {
-            throw new Error("ERROR[TagItem] :: value is not instance of LeatherTag")
+            throw new TypeError("ERROR[TagItem] :: value is not instance of LeatherTag")
           }
           _leatherTag = value
         },
@@ -745,17 +753,18 @@ if(window.LeatherTag == undefined) {
             case true: {
               _disabled = true
               this.dom.tagItem.classList.add(LeatherTag.CLASS_NAMES.LEATHER_TAG_ITEM_DISABLED)
-              this.dom.tagItem.removeChild(this.dom.tagDeleteBtn)
+              this.dom.tagItem.removeChild(this.dom.tagRemoveButton)
             } break;
             case false: {
               _disabled = false
               this.dom.tagItem.classList.remove(LeatherTag.CLASS_NAMES.LEATHER_TAG_ITEM_DISABLED)
-              this.dom.tagItem.appendChild(this.dom.tagDeleteBtn)
+              this.dom.tagItem.appendChild(this.dom.tagRemoveButton)
             } break;
           }
         },
       })
 
+      _checkTemplateFunctions.call(this)
       _dom = _buildDOM.call(this)
       this.disabled = _config.disabled
       this.leatherTag = _config.leatherTag
@@ -799,39 +808,40 @@ if(window.LeatherTag == undefined) {
 
     /**
      * Build DOM tag item
-     * @returns {object} contains tagItem and tagDeleteBtn
+     * @returns {object} contains tagItem, tagValue and tagRemoveButton DOM elements
      */
     function _buildDOM() {
-      const tagItem = document.createElement("div")
-      const tagValue = document.createElement("span")
-      const tagDeleteBtn = document.createElement("button")
-
       // Tag item wrapper
+      let tagItem = _buildTagTemplate.call(this, "tagItem")
       tagItem.classList.add(LeatherTag.CLASS_NAMES.LEATHER_TAG_ITEM)
       tagItem.addEventListener("click", (event) => event.stopPropagation())
       tagItem.addEventListener("dblclick", _onDblClickTagItem.bind(this))
+      for (let i = 0; i < this.config.classList.length; i++) {
+        tagItem.classList.add(this.config.classList[i])
+      }
       
       // Tag value
+      let tagValue = _buildTagTemplate.call(this, "tagValue")
       tagValue.classList.add(LeatherTag.CLASS_NAMES.LEATHER_TAG_VALUE)
       tagValue.addEventListener("keydown", _onKeydownTagValue.bind(this))
       tagValue.addEventListener("blur", _onBlurTagValue.bind(this))
       
       // Delete button
-      tagDeleteBtn.classList.add(LeatherTag.CLASS_NAMES.LEATHER_TAG_BTN_REMOVE)
-      tagDeleteBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 48 48"><path d="M38 12.83l-2.83-2.83-11.17 11.17-11.17-11.17-2.83 2.83 11.17 11.17-11.17 11.17 2.83 2.83 11.17-11.17 11.17 11.17 2.83-2.83-11.17-11.17z"/></svg>`
-      tagDeleteBtn.addEventListener("click", _onClickTagDeleteBtn.bind(this))
+      let tagRemoveButton = _buildTagTemplate.call(this, "tagRemoveButton")
+      tagRemoveButton.classList.add(LeatherTag.CLASS_NAMES.LEATHER_TAG_BTN_REMOVE)
+      tagRemoveButton.addEventListener("click", _onClickTagRemoveButton.bind(this))
 
       tagItem.appendChild(tagValue)
-      tagItem.appendChild(tagDeleteBtn)
+      tagItem.appendChild(tagRemoveButton)
 
-      return { tagItem, tagValue, tagDeleteBtn }
+      return { tagItem, tagValue, tagRemoveButton }
     }
 
     /**
      * On click button remove tag
      * @param {PointerEvent} event
      */
-    function _onClickTagDeleteBtn(event) {
+    function _onClickTagRemoveButton(event) {
       event.stopPropagation()
       this.remove(this)
     }
@@ -879,6 +889,37 @@ if(window.LeatherTag == undefined) {
       if(this.value != value) {
         this.updateValue(value)
       }
+    }
+
+    /**
+     * Check all templates are type of function
+     * @throws {TypeError} when a property of template config is not a type of function
+     */
+    function _checkTemplateFunctions() {
+      this.config.template = LeatherTag._buildConfigObject(_defaultConfig.template, this.config.template)
+      for (const key in this.config.template) {
+        if (Object.hasOwnProperty.call(this.config.template, key)) {
+          if(typeof this.config.template[key] != "function") {
+            throw new TypeError(`ERROR[TagItem] :: '${key}' must be a function returns a template.`)
+          }
+        }
+      }
+    }
+
+    function _buildTagTemplate(tagTemplate) {
+      let _tagTemplate = this.config.template[tagTemplate].call(this)
+      if(typeof _tagTemplate != "string" && !(_tagTemplate instanceof HTMLElement)) {
+        throw new TypeError(`ERROR[TagItem] :: '${_tagTemplate}' template is not type of string or HTMLElement`)
+      }
+      if(typeof _tagTemplate == "string") {
+        const tempTagTemplate = document.createElement("div")
+        tempTagTemplate.innerHTML = _tagTemplate
+        _tagTemplate = tempTagTemplate.firstElementChild
+        if(!(_tagTemplate instanceof HTMLElement)) {
+          throw new TypeError(`ERROR[TagItem] :: '${_tagTemplate}' template is not type of HTMLElement`)
+        }
+      }
+      return _tagTemplate
     }
 
     return TagItem
