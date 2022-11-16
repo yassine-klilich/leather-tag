@@ -23,9 +23,13 @@ window.tagsObj = new LeatherTag({
   onAllRemoved: function() {
     console.log("1111");
   },
-  onEdit: function(leatherTag, tagItem) {
-    console.log(leatherTag);
+  onClick: function(event) {
+    console.log(event);
+    console.log(this);
+  },
+  onEdit: function(tagItem) {
     console.log(tagItem);
+    console.log(this);
   }
 })
 window.customTag = new LeatherTag({

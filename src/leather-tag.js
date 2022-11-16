@@ -22,23 +22,23 @@ if(window.LeatherTag == undefined) {
       regexPattern: null,
       maxTags: null,
       showAutoCompleteAfter: null,
-      onClick: function(event, leatherTag) {},
+      onClick: function(event) {},
       onCreate: function() {},
       onBeforeTagAdd: function() {},
-      onTagAdd: function() {},
+      onTagAdded: function(tagItem) {},
       onAllAdded: function() {},
       onBeforeTagRemove: function() {},
-      onTagRemove: function() {},
+      onTagRemoved: function(tagItem) {},
       onAllRemoved: function() {},
-      onInvalidTag: function() {},
+      onInvalidTagValue: function(value) {},
       onShowAutoComptele: function() {},
       onHideAutoComptele: function() {},
-      onSelectAutoCompleteOption: function() {},
-      onFocus: function() {},
-      onBlur: function() {},
-      onInput: function() {},
+      onSelectAutoCompleteOption: function(value) {},
+      onFocus: function(event) {},
+      onBlur: function(event) {},
+      onInput: function(event) {},
       onMaxTags: function() {},
-      onEdit: function() {},
+      onEdit: function(tagItem) {},
       //mixed: false,
       //minTags: null,
       //forceAutoCompleteOptions: false,
@@ -190,21 +190,21 @@ if(window.LeatherTag == undefined) {
       })
 
       this.config = config
-      this.config.onCreate(this)
+      this.config.onCreate.call(this)
     }
 
     /**
      * Add tag item
-     * @param {string | TagItem} value 
+     * @param {TagItem} value 
      */
     LeatherTag.prototype.addTag = function(param) {
       if(param == null) {
         throw new Error(`ERROR[LeatherTag.addTag] :: parameter should not be null`)
       }
-      this.config.onBeforeTagAdd(this)
+      this.config.onBeforeTagAdd.call(this)
       if(this._preventAddingTag == false) {
         if(this.config.maxTags != null && this.tagItems.length == this.config.maxTags) {
-          this.config.onMaxTags(this)
+          this.config.onMaxTags.call(this)
           return
         }
         if(typeof param != "string" && !(param instanceof String) && !(param instanceof TagItem)) {
@@ -219,7 +219,7 @@ if(window.LeatherTag == undefined) {
         }
 
         if(this.isValueValid(_tagItemConfig.value) == false) {
-          this.config.onInvalidTag(_tagItemConfig.value)
+          this.config.onInvalidTagValue.call(this, _tagItemConfig.value)
           return
         }
         let tagItem = null
@@ -233,7 +233,7 @@ if(window.LeatherTag == undefined) {
         }
         this.dom.tagsWrapper.insertBefore(tagItem.dom.tagItem, this.dom.inputElement)
         this.tagItems.push(tagItem)
-        this.config.onTagAdd(this)
+        this.config.onTagAdded.call(this, tagItem)
 
         return tagItem
       }
@@ -251,7 +251,7 @@ if(window.LeatherTag == undefined) {
       values.forEach((value) => {
         this.addTag(value)
       })
-      this.config.onAllAdded()
+      this.config.onAllAdded.call(this, )
     }
 
     /**
@@ -259,7 +259,7 @@ if(window.LeatherTag == undefined) {
      * @param {number | TagItem} tagItem Even tag index or tag element
      */
     LeatherTag.prototype.removeTag = function(tagItem) {
-      this.config.onBeforeTagRemove(this)
+      this.config.onBeforeTagRemove.call(this)
       let _removedTagItem = null
       for (let i = 0; i < this.tagItems.length; i++) {
         if(i == tagItem || this.tagItems[i] == tagItem) {
@@ -268,7 +268,7 @@ if(window.LeatherTag == undefined) {
           break
         }
       }
-      this.config.onTagRemove(this)
+      this.config.onTagRemoved.call(this, _removedTagItem)
       return _removedTagItem
     }
 
@@ -279,7 +279,7 @@ if(window.LeatherTag == undefined) {
       for (let i = 0; i < this.tagItems.length;) {
         this.removeTag(this.tagItems[i])
       }
-      this.config.onAllRemoved()
+      this.config.onAllRemoved.call(this)
     }
 
     /**
@@ -382,14 +382,14 @@ if(window.LeatherTag == undefined) {
           _fillAndShowAutoComplete.call(this, matchAutoCompleteOptions)
         }
       }
-      this.config.onFocus(event, this)
+      this.config.onFocus.call(this, event)
     }
 
     /**
      * Event handler for input element
      */
     function _onBlurInputTags(event) {
-      this.config.onBlur(event, this)
+      this.config.onBlur.call(this, event)
     }
 
     /**
@@ -408,7 +408,7 @@ if(window.LeatherTag == undefined) {
           this.hideAutoComplete()
         }
       }
-      this.config.onInput(event, this)
+      this.config.onInput.call(this, event)
     }
 
     /**
@@ -461,7 +461,7 @@ if(window.LeatherTag == undefined) {
      * On click tag wrapper
      */
     function _onClickTagsWrapper(event) {
-      this.config.onClick(event, this)
+      this.config.onClick.call(this, event)
       event.stopPropagation()
       this.dom.inputElement.focus()
       if(this.autoCompleteOpen == false) {
@@ -570,7 +570,7 @@ if(window.LeatherTag == undefined) {
           }
           this._scrollParent.addEventListener("scroll", this._bindFuncHideAutoComplete)
         }
-        this.config.onShowAutoComptele(this)
+        this.config.onShowAutoComptele.call(this)
       }
     }
     
@@ -591,7 +591,7 @@ if(window.LeatherTag == undefined) {
           this._currentFocusedAutoCompleteElement = null
         }
         this.shownAutoCompleteOptions = []
-        this.config.onHideAutoComptele(this)
+        this.config.onHideAutoComptele.call(this)
       }
     }
 
@@ -621,7 +621,7 @@ if(window.LeatherTag == undefined) {
      * On click auto-complete option event handler 
      */
     function _onClickAutoCompleteOption(value) {
-      this.config.onSelectAutoCompleteOption(this, value)
+      this.config.onSelectAutoCompleteOption.call(this, value)
       if(this.addTag(value) != null) {
         this.inputValue = ""
       }
@@ -789,7 +789,7 @@ if(window.LeatherTag == undefined) {
     TagItem.prototype.updateValue = function(value) {
       this.value = value
       if(this.leatherTag instanceof LeatherTag) {
-        this.leatherTag.config.onEdit(this.leatherTag, this)
+        this.leatherTag.config.onEdit.call(this.leatherTag, this)
       }
     }
 
