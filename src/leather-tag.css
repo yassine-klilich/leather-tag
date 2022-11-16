@@ -41,6 +41,9 @@
 
 .leather-tag__value[contenteditable="true"] {
   outline: none;
+  background-color: #fff;
+  padding: 0px 6px;
+  border-radius: 4px;
 }
 
 .leather-tag__btn-remove {

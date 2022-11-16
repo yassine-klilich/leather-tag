@@ -22,7 +22,7 @@ if(window.LeatherTag == undefined) {
       regexPattern: null,
       maxTags: null,
       showAutoCompleteAfter: null,
-      onClick: function() {},
+      onClick: function(event, leatherTag) {},
       onCreate: function() {},
       onBeforeTagAdd: function() {},
       onTagAdd: function() {},
@@ -38,10 +38,10 @@ if(window.LeatherTag == undefined) {
       onBlur: function() {},
       onInput: function() {},
       onMaxTags: function() {},
+      onEdit: function() {},
       //mixed: false,
       //minTags: null,
       //forceAutoCompleteOptions: false,
-      //onEdit: function() {},
     })
 
     LeatherTag.DefaultConfig = _defaultConfig
@@ -66,6 +66,20 @@ if(window.LeatherTag == undefined) {
       }
       return _config
     }
+
+    LeatherTag.CLASS_NAMES = Object.freeze({
+      LEATHER_TAG: "leather-tag",
+      LEATHER_TAG_INPUT: "leather-tag__input",
+      LEATHER_TAG_DISABLED: "leather-tag--disabled",
+      LEATHER_TAG_AUTOCOMPLETE: "leather-tag__autocomplete",
+      LEATHER_TAG_AUTOCOMPLETE_LI_FOCUSED: "leather-tag__autocomplete-li--focused",
+      LEATHER_TAG_ITEM: "leather-tag__item",
+      LEATHER_TAG_ITEM_ANIMATION: "leather-tag__item--animation",
+      LEATHER_TAG_ITEM_DISABLED: "leather-tag__item--disabled",
+      LEATHER_TAG_ITEM_EDIT: "leather-tag__item--edit",
+      LEATHER_TAG_VALUE: "leather-tag__value",
+      LEATHER_TAG_BTN_REMOVE: "leather-tag__btn-remove",
+    })
 
     function LeatherTag(config = _defaultConfig) {
       let _config = _defaultConfig
@@ -124,10 +138,10 @@ if(window.LeatherTag == undefined) {
         set: (value) => {
           switch (value) {
             case true: {
-              this.dom.tagsWrapper.classList.add("leather-tag--disabled")
+              this.dom.tagsWrapper.classList.add(LeatherTag.CLASS_NAMES.LEATHER_TAG_DISABLED)
             } break;
             case false: {
-              this.dom.tagsWrapper.classList.remove("leather-tag--disabled")
+              this.dom.tagsWrapper.classList.remove(LeatherTag.CLASS_NAMES.LEATHER_TAG_DISABLED)
             } break;
           }
           _disabled = value
@@ -342,8 +356,8 @@ if(window.LeatherTag == undefined) {
           this.dom.tagsWrapper.classList.add(classItem)
         }
         this.dom.inputElement = document.createElement("input")
-        this.dom.tagsWrapper.classList.add("leather-tag")
-        this.dom.inputElement.classList.add("leather-tag__input")
+        this.dom.tagsWrapper.classList.add(LeatherTag.CLASS_NAMES.LEATHER_TAG)
+        this.dom.inputElement.classList.add(LeatherTag.CLASS_NAMES.LEATHER_TAG_INPUT)
         this.dom.tagsWrapper.appendChild(this.dom.inputElement)
         this.dom.inputElement.setAttribute("placeholder", this.config.placeholder || "Type and press Enter")
         this.dom.autoCompleteWrapper = _buildAutoCompleteDOM.call(this)
@@ -499,7 +513,7 @@ if(window.LeatherTag == undefined) {
         this._setTimeoutAnimation = setTimeout(() => {
           _stopAnimationMatchedTagElement.call(this, index)
         }, 1000)
-        this.tagItems[index].dom.tagItem.classList.add("leather-tag__item--animation")
+        this.tagItems[index].dom.tagItem.classList.add(LeatherTag.CLASS_NAMES.LEATHER_TAG_ITEM_ANIMATION)
       }
     }
 
@@ -509,7 +523,7 @@ if(window.LeatherTag == undefined) {
      */
     function _stopAnimationMatchedTagElement(index) {
       if(this._setTimeoutAnimation != null) {
-        this.tagItems[index].dom.tagItem.classList.remove("leather-tag__item--animation")
+        this.tagItems[index].dom.tagItem.classList.remove(LeatherTag.CLASS_NAMES.LEATHER_TAG_ITEM_ANIMATION)
         clearTimeout(this._setTimeoutAnimation)
         this._setTimeoutAnimation = null
       }
@@ -521,7 +535,7 @@ if(window.LeatherTag == undefined) {
      */
     function _buildAutoCompleteDOM() {
       const autoCompleteWrapper = document.createElement("div")
-      autoCompleteWrapper.classList.add("leather-tag__autocomplete")
+      autoCompleteWrapper.classList.add(LeatherTag.CLASS_NAMES.LEATHER_TAG_AUTOCOMPLETE)
       autoCompleteWrapper.addEventListener("click", (event) => event.stopPropagation())
       return autoCompleteWrapper
     }
@@ -573,7 +587,7 @@ if(window.LeatherTag == undefined) {
           this._scrollParent = null
         }
         if(this._currentFocusedAutoCompleteElement != null) {
-          this._currentFocusedAutoCompleteElement.classList.remove("leather-tag__autocomplete-li--focused")
+          this._currentFocusedAutoCompleteElement.classList.remove(LeatherTag.CLASS_NAMES.LEATHER_TAG_AUTOCOMPLETE_LI_FOCUSED)
           this._currentFocusedAutoCompleteElement = null
         }
         this.shownAutoCompleteOptions = []
@@ -646,7 +660,7 @@ if(window.LeatherTag == undefined) {
     function _setFocusedAutoCompleteOption(nextOrPrevious) {
       if(this.dom.autoCompleteList.childElementCount > 0) {
         if(this._currentFocusedAutoCompleteElement != null) {
-          this._currentFocusedAutoCompleteElement.classList.remove("leather-tag__autocomplete-li--focused")
+          this._currentFocusedAutoCompleteElement.classList.remove(LeatherTag.CLASS_NAMES.LEATHER_TAG_AUTOCOMPLETE_LI_FOCUSED)
           this._currentFocusedAutoCompleteElement = this._currentFocusedAutoCompleteElement[nextOrPrevious]
         }
         if(this._currentFocusedAutoCompleteElement == null) {
@@ -659,7 +673,7 @@ if(window.LeatherTag == undefined) {
             } break;
           }
         }
-        this._currentFocusedAutoCompleteElement.classList.add("leather-tag__autocomplete-li--focused")
+        this._currentFocusedAutoCompleteElement.classList.add(LeatherTag.CLASS_NAMES.LEATHER_TAG_AUTOCOMPLETE_LI_FOCUSED)
         return this.shownAutoCompleteOptions[parseInt(this._currentFocusedAutoCompleteElement.dataset.index)]
       }
     }
@@ -688,7 +702,7 @@ if(window.LeatherTag == undefined) {
       if(_config.value == null) {
         throw new Error(`ERROR[TagItem] :: Please provide a tag value`)
       }
-      let _value = _config.value
+      let _value = ""
       let _leatherTag = null
       let _dom = null
       let _data = _config.data
@@ -726,12 +740,12 @@ if(window.LeatherTag == undefined) {
           switch (value) {
             case true: {
               _disabled = true
-              this.dom.tagItem.classList.add("leather-tag__item--disabled")
+              this.dom.tagItem.classList.add(LeatherTag.CLASS_NAMES.LEATHER_TAG_ITEM_DISABLED)
               this.dom.tagItem.removeChild(this.dom.tagDeleteBtn)
             } break;
             case false: {
               _disabled = false
-              this.dom.tagItem.classList.remove("leather-tag__item--disabled")
+              this.dom.tagItem.classList.remove(LeatherTag.CLASS_NAMES.LEATHER_TAG_ITEM_DISABLED)
               this.dom.tagItem.appendChild(this.dom.tagDeleteBtn)
             } break;
           }
@@ -741,13 +755,14 @@ if(window.LeatherTag == undefined) {
       _dom = _buildDOM.call(this)
       this.disabled = _config.disabled
       this.leatherTag = _config.leatherTag
+      this.value = _config.value
     }
 
     /**
      * Remove tag item
      */
     TagItem.prototype.remove = function() {
-      if(this.leatherTag) {
+      if(this.leatherTag instanceof LeatherTag) {
         this.leatherTag.removeTag(this)
         this.leatherTag = null
       }
@@ -768,6 +783,17 @@ if(window.LeatherTag == undefined) {
     }
 
     /**
+     * Update tag value
+     * @param {string} value
+     */
+    TagItem.prototype.updateValue = function(value) {
+      this.value = value
+      if(this.leatherTag instanceof LeatherTag) {
+        this.leatherTag.config.onEdit(this.leatherTag, this)
+      }
+    }
+
+    /**
      * Build DOM tag item
      * @returns {object} contains tagItem and tagDeleteBtn
      */
@@ -777,21 +803,20 @@ if(window.LeatherTag == undefined) {
       const tagDeleteBtn = document.createElement("button")
 
       // Tag item wrapper
-      tagItem.classList.add("leather-tag__item")
+      tagItem.classList.add(LeatherTag.CLASS_NAMES.LEATHER_TAG_ITEM)
       tagItem.addEventListener("click", (event) => event.stopPropagation())
       tagItem.addEventListener("dblclick", _onDblClickTagItem.bind(this))
       
       // Tag value
-      tagValue.classList.add("leather-tag__value")
+      tagValue.classList.add(LeatherTag.CLASS_NAMES.LEATHER_TAG_VALUE)
       tagValue.addEventListener("keydown", _onKeydownTagValue.bind(this))
       tagValue.addEventListener("blur", _onBlurTagValue.bind(this))
       
       // Delete button
-      tagDeleteBtn.classList.add("leather-tag__btn-remove")
+      tagDeleteBtn.classList.add(LeatherTag.CLASS_NAMES.LEATHER_TAG_BTN_REMOVE)
       tagDeleteBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 48 48"><path d="M38 12.83l-2.83-2.83-11.17 11.17-11.17-11.17-2.83 2.83 11.17 11.17-11.17 11.17 2.83 2.83 11.17-11.17 11.17 11.17 2.83-2.83-11.17-11.17z"/></svg>`
       tagDeleteBtn.addEventListener("click", _onClickTagDeleteBtn.bind(this))
 
-      tagValue.textContent = this.value
       tagItem.appendChild(tagValue)
       tagItem.appendChild(tagDeleteBtn)
 
@@ -814,6 +839,7 @@ if(window.LeatherTag == undefined) {
     function _onDblClickTagItem(event) {
       event.stopPropagation()
       if(this.disabled == false) {
+        this.dom.tagItem.classList.add(LeatherTag.CLASS_NAMES.LEATHER_TAG_ITEM_EDIT)
         this.dom.tagValue.setAttribute("contenteditable", true)
       }
     }
@@ -825,11 +851,10 @@ if(window.LeatherTag == undefined) {
     function _onKeydownTagValue(event) {
       if (event.key == "Enter") {
         event.preventDefault()
-        _unfocusAndUpdateValue.call(this)
+        _unfocusAndUpdateValue.call(this, this.dom.tagValue.textContent)
       }
       if (event.key == "Escape") {
-        this.dom.tagValue.setAttribute("contenteditable", false)
-        this.value = this.value
+        _unfocusAndUpdateValue.call(this, this.value)
       }
     }
 
@@ -837,15 +862,19 @@ if(window.LeatherTag == undefined) {
      * On blur tag value
      */
     function _onBlurTagValue() {
-      _unfocusAndUpdateValue.call(this)
+      _unfocusAndUpdateValue.call(this, this.dom.tagValue.textContent)
     }
 
     /**
      * Unfocus from tag value element and update tag item value
+     * @param {string} value
      */
-    function _unfocusAndUpdateValue() {
+    function _unfocusAndUpdateValue(value) {
+      this.dom.tagItem.classList.remove(LeatherTag.CLASS_NAMES.LEATHER_TAG_ITEM_EDIT)
       this.dom.tagValue.setAttribute("contenteditable", false)
-      this.value = this.dom.tagValue.textContent
+      if(this.value != value) {
+        this.updateValue(value)
+      }
     }
 
     return TagItem
