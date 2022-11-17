@@ -23,6 +23,7 @@ window.tagsObj = new LeatherTag({
       }
     })
   ],
+  showAutoCompleteAfter: 2,
   classList: ["custom-tag"],
   placeholder: "Add some food you like...",
   allowDuplicates: false,

@@ -168,12 +168,17 @@ if(window.LeatherTag == undefined) {
         set: (value) => {
           switch (value) {
             case true: {
-              _autoCompleteOpen = true
-              _showAutoComplete.call(this)
+              const showAutoCompleteAfter = this.config.showAutoCompleteAfter
+              if(this.dom.autoCompleteWrapper.parentElement == null && (showAutoCompleteAfter == null || this.inputValue.length == showAutoCompleteAfter)) {
+                _autoCompleteOpen = true
+                _showAutoComplete.call(this)
+              }
             } break;
             case false: {
-              _autoCompleteOpen = false
-              _hideAutoComplete.call(this)
+              if(this.dom.autoCompleteWrapper.parentElement == document.body) {
+                _autoCompleteOpen = false
+                _hideAutoComplete.call(this)
+              }
             } break;
           }
         }
@@ -563,42 +568,37 @@ if(window.LeatherTag == undefined) {
      * Append auto-complete
      */
     function _showAutoComplete() {
-      const showAutoCompleteAfter = this.config.showAutoCompleteAfter
-      if(this.dom.autoCompleteWrapper.parentElement == null && (showAutoCompleteAfter == null || this.inputValue.length == showAutoCompleteAfter)) {
-        document.body.appendChild(this.dom.autoCompleteWrapper)
-        _setAutoCompletePosition.call(this)
-        document.addEventListener("click", this._bindFuncHideAutoComplete)
-        window.addEventListener("resize", this._bindFuncHideAutoComplete)
-        this._scrollParent = _getScrollParent(this.dom.tagsWrapper)
-        if(this._scrollParent != null) {
-          if(this._scrollParent == document.documentElement) {
-            this._scrollParent = document
-          }
-          this._scrollParent.addEventListener("scroll", this._bindFuncHideAutoComplete)
+      document.body.appendChild(this.dom.autoCompleteWrapper)
+      _setAutoCompletePosition.call(this)
+      document.addEventListener("click", this._bindFuncHideAutoComplete)
+      window.addEventListener("resize", this._bindFuncHideAutoComplete)
+      this._scrollParent = _getScrollParent(this.dom.tagsWrapper)
+      if(this._scrollParent != null) {
+        if(this._scrollParent == document.documentElement) {
+          this._scrollParent = document
         }
-        this.config.onShowAutoComptele.call(this)
+        this._scrollParent.addEventListener("scroll", this._bindFuncHideAutoComplete)
       }
+      this.config.onShowAutoComptele.call(this)
     }
     
     /**
      * Remove auto-complete
      */
     function _hideAutoComplete() {
-      if(this.dom.autoCompleteWrapper.parentElement == document.body) {
-        document.body.removeChild(this.dom.autoCompleteWrapper)
-        document.removeEventListener("click", this._bindFuncHideAutoComplete)
-        window.removeEventListener("resize", this._bindFuncHideAutoComplete)
-        if(this._scrollParent != null) {
-          this._scrollParent.removeEventListener("scroll", this._bindFuncHideAutoComplete)
-          this._scrollParent = null
-        }
-        if(this._currentFocusedAutoCompleteElement != null) {
-          this._currentFocusedAutoCompleteElement.classList.remove(LeatherTag.CLASS_NAMES.LEATHER_TAG_AUTOCOMPLETE_LI_FOCUSED)
-          this._currentFocusedAutoCompleteElement = null
-        }
-        this.shownAutoCompleteOptions = []
-        this.config.onHideAutoComptele.call(this)
+      document.body.removeChild(this.dom.autoCompleteWrapper)
+      document.removeEventListener("click", this._bindFuncHideAutoComplete)
+      window.removeEventListener("resize", this._bindFuncHideAutoComplete)
+      if(this._scrollParent != null) {
+        this._scrollParent.removeEventListener("scroll", this._bindFuncHideAutoComplete)
+        this._scrollParent = null
       }
+      if(this._currentFocusedAutoCompleteElement != null) {
+        this._currentFocusedAutoCompleteElement.classList.remove(LeatherTag.CLASS_NAMES.LEATHER_TAG_AUTOCOMPLETE_LI_FOCUSED)
+        this._currentFocusedAutoCompleteElement = null
+      }
+      this.shownAutoCompleteOptions = []
+      this.config.onHideAutoComptele.call(this)
     }
 
     /**
