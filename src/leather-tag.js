@@ -139,9 +139,11 @@ if(window.LeatherTag == undefined) {
           switch (value) {
             case true: {
               this.dom.tagsWrapper.classList.add(LeatherTag.CLASS_NAMES.LEATHER_TAG_DISABLED)
+              this.tagItems.forEach(item => item.disabled = true)
             } break;
             case false: {
               this.dom.tagsWrapper.classList.remove(LeatherTag.CLASS_NAMES.LEATHER_TAG_DISABLED)
+              this.tagItems.forEach(item => item.disabled = false)
             } break;
           }
           _disabled = value
@@ -693,7 +695,6 @@ if(window.LeatherTag == undefined) {
     const _defaultConfig = Object.freeze({
       leatherTag: null,
       disabled: false,
-      readonly: false,
       value: null,
       data: null,
       classList: [],
