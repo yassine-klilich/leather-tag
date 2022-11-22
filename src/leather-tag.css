@@ -118,6 +118,12 @@
   background-color: #ededed;
 }
 
+.leather-tag__no-result {
+  line-height: 26px;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
 @-webkit-keyframes leatherTagItemAnimation {
   0% {
     -webkit-transform: translateX(0);

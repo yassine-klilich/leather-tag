@@ -16,7 +16,6 @@ if(window.LeatherTag == undefined) {
       disabled: false,
       allowDuplicates: true,
       placeholder: "",
-      placeholder: "",
       allowedTags: [],
       disallowedTags: [],
       autoComplete: [],
@@ -696,7 +695,7 @@ if(window.LeatherTag == undefined) {
       this.dom.autoCompleteWrapper.innerHTML = ""
       const noResultFoundMsg = document.createElement("div")
       noResultFoundMsg.classList.add(LeatherTag.CLASS_NAMES.NO_RESULT)
-      noResultFoundMsg.textContent = 
+      noResultFoundMsg.textContent = "No result found"
       this.dom.autoCompleteWrapper.appendChild(noResultFoundMsg)
     }
   

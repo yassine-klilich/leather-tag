@@ -17,13 +17,16 @@ window.tagsObj = new LeatherTag({
       value: "Tacos",
       data: "Helloooo !",
       template: {
+        tagItem: function() {
+          return `<i>${this.value}</i>`
+        },
         tagValue: function() {
           return `<i>${this.value}</i>`
         },
       }
     })
   ],
-  showAutoCompleteAfter: 2,
+  showAutoCompleteAfter: 0,
   classList: ["custom-tag"],
   placeholder: "Add some food you like...",
   allowDuplicates: false,
@@ -38,12 +41,12 @@ window.tagsObj = new LeatherTag({
     console.log("1111");
   },
   onClick: function(event) {
-    console.log(event);
-    console.log(this);
+    //console.log(event);
+    //console.log(this);
   },
   onEdit: function(tagItem) {
-    console.log(tagItem);
-    console.log(this);
+    //console.log(tagItem);
+    //console.log(this);
   }
 })
 window.customTag = new LeatherTag({
