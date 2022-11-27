@@ -1,6 +1,6 @@
 window.tagsObj = new LeatherTag({
   el: "tags",
-  initialTags: [
+  values: [
     "Couscous",
     "Tajine",
     new TagItem({
@@ -51,7 +51,7 @@ window.tagsObj = new LeatherTag({
 })
 window.customTag = new LeatherTag({
   el: "customTag",
-  initialTags: [
+  values: [
     "Mlokhiya"
   ]
 })

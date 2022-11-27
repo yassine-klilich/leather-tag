@@ -11,11 +11,10 @@ if(window.LeatherTag == undefined) {
     
     const _defaultConfig = Object.freeze({
       el: null,
-      initialTags: [],
+      values: [],
       classList: [],
       disabled: false,
       allowDuplicates: true,
-      placeholder: "",
       placeholder: "",
       allowedTags: [],
       disallowedTags: [],
@@ -106,7 +105,7 @@ if(window.LeatherTag == undefined) {
             _config = LeatherTag._buildConfigObject(_config, value)
             _checkConfigValues.call(this)
             _initGUI.call(this)
-            this.values = _config.initialTags
+            this.values = _config.values
             this.disabled = _config.disabled
             this.autoComplete = _config.autoComplete
           }
@@ -140,15 +139,17 @@ if(window.LeatherTag == undefined) {
         set: (value) => {
           switch (value) {
             case true: {
+              _disabled = value
               this.dom.tagsWrapper.classList.add(LeatherTag.CLASS_NAMES.DISABLED)
               this.tagItems.forEach(item => item.disabled = true)
+              this.inputValue = ""
             } break;
             case false: {
+              _disabled = value
               this.dom.tagsWrapper.classList.remove(LeatherTag.CLASS_NAMES.DISABLED)
               this.tagItems.forEach(item => item.disabled = false)
             } break;
           }
-          _disabled = value
         },
       })
       Object.defineProperty(this, "autoComplete", {
@@ -727,13 +728,14 @@ if(window.LeatherTag == undefined) {
     })
 
     function TagItem(config = _defaultConfig) {
-      let _config = LeatherTag._buildConfigObject(_defaultConfig, config)
-      if(_config.value == null) {
-        throw new Error(`ERROR[TagItem] :: Please provide a tag value`)
-      }
+      let _config = _defaultConfig
       let _value = ""
       let _leatherTag = null
-      let _dom = null
+      let _dom = {
+        tagItem: null,
+        tagValue: null,
+        tagRemoveButton: null
+      }
       let _data = _config.data
       let _disabled = false
 
@@ -748,6 +750,18 @@ if(window.LeatherTag == undefined) {
       })
       Object.defineProperty(this, "config", {
         get: () => _config,
+        set: (value) => {
+          if(value != null && Object.keys(value).length > 0) {
+            _config = LeatherTag._buildConfigObject(_config, value)
+            if(_config.value == null) {
+              throw new Error(`ERROR[TagItem] :: Please provide a tag value`)
+            }
+            _checkTemplateFunctions.call(this)
+            _buildDOM.call(this)
+            this.disabled = _config.disabled
+            this.value = _config.value
+          }
+        }
       })
       Object.defineProperty(this, "dom", {
         get: () => _dom,
@@ -781,11 +795,8 @@ if(window.LeatherTag == undefined) {
         },
       })
 
-      _checkTemplateFunctions.call(this)
-      _dom = _buildDOM.call(this)
-      this.disabled = _config.disabled
+      this.config = config
       this.leatherTag = _config.leatherTag
-      this.value = _config.value
     }
 
     /**
@@ -851,7 +862,9 @@ if(window.LeatherTag == undefined) {
       tagItem.appendChild(tagValue)
       tagItem.appendChild(tagRemoveButton)
 
-      return { tagItem, tagValue, tagRemoveButton }
+      this.dom.tagItem = tagItem
+      this.dom.tagValue = tagValue
+      this.dom.tagRemoveButton = tagRemoveButton
     }
 
     /**
